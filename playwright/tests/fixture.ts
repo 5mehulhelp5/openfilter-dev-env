@@ -47,7 +47,48 @@ export const test = base.extend({
     await use(context);
     await context.dispose();
   },
+  // CSP sweep (10, 08 §7): every storefront test with JavaScript fails on a Content-Security-Policy violation,
+  // reported by the browser's securitypolicyviolation event or its console message.
+  page: async ({ page, javaScriptEnabled }, use) => {
+    const violations: string[] = [];
+    if (javaScriptEnabled !== false) {
+      await page.addInitScript(() => {
+        document.addEventListener('securitypolicyviolation', (event) => {
+          console.error(`CSP violation: ${event.violatedDirective} ${event.blockedURI} ${event.sourceFile}:${event.lineNumber}`);
+        });
+      });
+      page.on('console', (message) => {
+        if (/CSP violation|Content Security Policy|Refused to (load|execute|apply)/i.test(message.text())) {
+          violations.push(message.text());
+        }
+      });
+    }
+    await use(page);
+    expect(violations, 'Content-Security-Policy violations').toEqual([]);
+  },
 });
+
+/** Adds an OpenLabel label on every product (listing and product page); returns its id (OpenLabel's own seed). */
+export function seedOpenLabel(name: string): number {
+  sql(`DELETE FROM openlabel_label WHERE name = '${name}'`);
+  const id = Number(sql(
+    `INSERT INTO openlabel_label (name, status, priority, design_id, store_ids, customer_group_ids, conditions_serialized) `
+    + `SELECT '${name}', 1, 9, MIN(design_id), '', '', NULL FROM openlabel_design WHERE is_system = 1; `
+    + `SET @l = LAST_INSERT_ID(); `
+    + `INSERT INTO openlabel_placement (label_id, area, position, max_labels) VALUES (@l, 'listing', 'tl', 3), (@l, 'product', 'tl', 3); `
+    + `SELECT @l;`,
+  ).pop()?.[0]);
+  magento('openlabel:reindex', String(id));
+  magento('openlabel:css:regenerate');
+  magento('cache:flush', 'full_page');
+  return id;
+}
+
+export function unseedOpenLabel(id: number): void {
+  sql(`DELETE FROM openlabel_label WHERE label_id = ${Number(id)}`);
+  magento('openlabel:css:regenerate');
+  magento('cache:flush', 'full_page');
+}
 export { expect };
 
 /** Hyvä default theme version of the running project as [major, minor] (project metadata, tests/stores.ts). */

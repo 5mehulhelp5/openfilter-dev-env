@@ -45,3 +45,5 @@ Finding (S6): media queries placed before the plain rules they override lost on 
 Finding (S6): after template changes the fixture needs cache:flush (Varnish served the old HTML); specs were red for that reason once.
 Measured (S6): script 23.4 KB raw, 5.9 KB gzipped (budget 6 KB); CSS 2.4 KB gzipped (budget 4 KB).
 Task S6: complete (openfilter a11d827, openfilter-hyva ab65f44, dev-env c1fcd44; unit core 272, hyva 13; integration hyva 13/13 (drawer markup in AjaxComponentTest); PHPCS zero, PHPStan clean; Playwright storefront 91 passed + 10 skipped by design (m3-drawer.mobile 6 × 2)).
+Ruling (S7): no core change in S7, so openfilter has no feat/m3-s7-search branch (the stack goes s6-drawer → s8-close); openfilter-hyva has feat/m3-s7-search — cost if wrong: none.
+Task S7: complete (openfilter-hyva 6f4de90, dev-env 318f331; unit hyva 13; integration hyva SearchPageTest 1/1 (watched failing without the layout); PHPCS zero, PHPStan clean; Playwright storefront 97 passed + 10 skipped by design (m3-search desktop/nojs/mobile × 2)).

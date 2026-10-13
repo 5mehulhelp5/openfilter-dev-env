@@ -1,6 +1,6 @@
 name: E2E
 
-# Storefront and admin Playwright specs on a Hyvä fixture store built from public
+# Storefront and admin Playwright specs plus the Lighthouse on/off gate on a Hyvä fixture store built from public
 # sources (Magento mirror, Hyvä OSL repositories on GitHub, OpenLabel from Packagist, OpenFilter main branches),
 # Varnish in front,
 # storefront CSP enforced. Runs on this repository's main and pull requests, nightly and on demand.
@@ -166,6 +166,11 @@ jobs:
           fi
 
 
+      - name: Lighthouse (OpenFilter on vs off)
+        if: matrix.mode == 'full'
+        working-directory: playwright
+        run: npm run lighthouse
+
       - name: Reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -173,5 +178,6 @@ jobs:
           name: e2e-${{ matrix.mode }}-hyva-${{ matrix.hyva.theme }}
           path: |
             playwright/playwright-report
+            playwright/lighthouse-report
             ${{ env.MAGENTO_ROOT }}/var/log
           retention-days: 14
