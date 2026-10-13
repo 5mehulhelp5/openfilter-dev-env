@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { hyvaThemeVersion } from './fixture';
+import { test, expect, hyvaThemeVersion } from './fixture';
 import { openFilterGroup } from './helpers';
 
 /**
@@ -47,10 +46,15 @@ test.describe('stock Hyvä layered navigation (M0 verification)', () => {
 
   test('swatch filter links carry rel=nofollow and an aria-label but no visible text for colours', async ({ page }) => {
     await openFilterGroup(page.locator('.filter-option', { hasText: /Color/ }).first());
-    const link = page.locator('.swatch-layered a.swatch-option-link-layered').first();
+    // 1.4: a.swatch-option-link-layered with an empty body; 1.5: a.swatch-option (SwatchRenderer view model) with
+    // the colour code as sr-only text.
+    const link = page.locator('.swatch-layered a.swatch-option-link-layered, [x-data="initLayeredSwatch"] a.swatch-option').first();
     await expect(link).toHaveAttribute('rel', 'nofollow');
     await expect(link).toHaveAttribute('aria-label', /Filter Color /);
-    expect((await link.innerText()).trim(), 'colour swatches have no visible text').toBe('');
+    const visibleText = await link.evaluate((el) => [...el.querySelectorAll('*')]
+      .filter((child) => !child.classList.contains('sr-only') && child.children.length === 0)
+      .map((child) => child.textContent ?? '').join('').trim() || (el.children.length === 0 ? el.textContent ?? '' : '').trim());
+    expect(visibleText, 'colour swatches have no visible text').toBe('');
   });
 
   test('Alpine 3 is on the page', async ({ page }) => {

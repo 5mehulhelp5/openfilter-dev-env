@@ -40,6 +40,27 @@ export function filterOptionLinks(html: string): Array<{ href: string; label: st
   return links;
 }
 
+/**
+ * Stock Hyvä colour swatch filter links in server HTML: 1.4 renders `a.swatch-option-link-layered`, 1.5 renders
+ * `a.swatch-option` (SwatchRenderer view model). Hrefs are decoded.
+ */
+export function swatchLinks(html: string): string[] {
+  return [...html.matchAll(/<a\s+href="([^"]+)"[^>]*?class="swatch-option(?:-link-layered)?["\s]/g)].map((m) => decodeEntities(m[1]));
+}
+
+/** Product total of a listing page from the toolbar ("Items 1-12 of 31", "31 Items"; 1.4 and 1.5), 0 when absent. */
+export function productTotal(html: string): number {
+  const amounts = [...decodeEntities(html).matchAll(/class="[^"]*toolbar-amount[^"]*"[^>]*>([\s\S]*?)<\/p>/g)]
+    .map((m) => m[1].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  for (const text of amounts) {
+    const match = /of (\d+)/.exec(text) ?? /(\d+) Items?/i.exec(text) ?? /(\d+)/.exec(text);
+    if (match) {
+      return Number(match[1]);
+    }
+  }
+  return 0;
+}
+
 /** Opens a stock Hyvä filter group (1.4: x-defer="intersect" starts the group only once it is in view). */
 export async function openFilterGroup(group: Locator): Promise<void> {
   await group.scrollIntoViewIfNeeded();

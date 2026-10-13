@@ -14,6 +14,7 @@
 !/bin/install-modules
 !/bin/fixture-data
 !/bin/after-hours
+!/bin/install-hyva15
 !/playwright/
 /playwright/node_modules/
 /playwright/test-results/
@@ -24,5 +25,17 @@
 /modules/*
 !/modules/*.md
 !/ci/
+# Fixture-only Magento code: the theme registry module and the RTL child theme (the Hyvä 1.5.2 copy is downloaded).
+!/app/
+/app/*
+!/app/code/
+/app/code/*
+!/app/code/OpenFilterFixture/
+!/app/design/
+/app/design/*
+!/app/design/frontend/
+/app/design/frontend/*
+!/app/design/frontend/OpenFilterFixture/
+/app/design/frontend/OpenFilterFixture/hyva-1-5-2/
 !/.github/
 playwright/lighthouse-report/

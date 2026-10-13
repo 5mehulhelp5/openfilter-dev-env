@@ -13,7 +13,10 @@ cp .env.example .env && cp admin.env.example admin.env   # set an admin password
 warden sign-certificate openfilter.test
 warden env up -d
 bin/setup            # Magento + sample data, Hyvä (bin/install-hyva), OpenLabel + OpenFilter (bin/install-modules), fixture data
+bin/install-hyva15   # Hyvä 1.5.2 as a second theme for store view "hyva15" (local 1.5 gate), then fixture data again
 ```
+
+Store views: `default` (Hyvä 1.4.2), `de` (German), `hyva15` (Hyvä 1.5.2, copied from the public tag under the theme name `OpenFilterFixture/hyva-1-5-2`; the fixture module `app/code/OpenFilterFixture/Themes` tells Hyvä it is a base theme) and `ar` (ar_SA, right to left through the child theme `app/design/frontend/OpenFilterFixture/hyva-rtl`).
 
 - Store: https://app.openfilter.test/ · admin: https://app.openfilter.test/admin (credentials in `admin.env`; two-factor auth and admin URL secret keys are off on this dev store only).
 - `./hyva` holds only the OSL/AFL-licensed Hyvä theme packages; nothing proprietary.
@@ -26,10 +29,10 @@ bin/setup            # Magento + sample data, Hyvä (bin/install-hyva), OpenLabe
 ```bash
 cd playwright && npm ci && npx playwright install chromium
 npx playwright test                          # all projects
-npx playwright test --project=desktop-chromium
+npx playwright test --project=desktop-h14 --project=desktop-h15
 ```
 
-Projects: `desktop-chromium`, `mobile-chromium` (`*.mobile.spec.ts`), `nojs-chromium` (`nojs/`, JavaScript disabled), `admin-chromium` (`admin/`, one login, serial). CI (`.github/workflows/e2e.yml`) builds the same store from public sources with `ci/install-fixture.sh` on Hyvä 1.4.2 and 1.5.2.
+Storefront projects run once per Hyvä version: `desktop-h14` / `desktop-h15`, `mobile-h14` / `mobile-h15` (`*.mobile.spec.ts`), `nojs-h14` / `nojs-h15` (`nojs/`, JavaScript disabled); `desktop-rtl` (`rtl/`) runs on store view `ar`. The `store-setup` project saves each store view's `store` and `X-Magento-Vary` cookies (never the session cookie). Specs import `test` from `tests/fixture.ts`, whose `request` fixture carries those cookies, and read the Hyvä version from the project (`isHyva15()`). `admin-chromium` (`admin/`, one login, serial). CI (`.github/workflows/e2e.yml`) builds the same store from public sources with `ci/install-fixture.sh`, one leg per Hyvä version installed as the default theme (`OF_THEMES=h14:default` or `h15:default`); `workflow_dispatch` takes `openfilter_ref` / `openfilter_hyva_ref` for stacked branches.
 
 ## GitHub activity window
 

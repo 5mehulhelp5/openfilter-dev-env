@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { magento, isHyva15Gallery } from './fixture';
+import { test, expect, magento, isHyva15 } from './fixture';
 import { collectCspViolations, firstProductUrl } from './helpers';
 
 /** Sample-data category present in every fixture build. */
@@ -41,7 +40,7 @@ test.describe('fixture store baseline', () => {
     const violations = collectCspViolations(page);
     await page.goto(await firstProductUrl(page, CATEGORY));
     await expect(page.locator('#gallery-main')).toBeVisible();
-    if (isHyva15Gallery()) {
+    if (isHyva15()) {
       await expect(page.locator('#gallery-main img').first()).toBeVisible();
     } else {
       await expect(page.locator('#gallery-main img').first()).toHaveAttribute('width', /\d+/);

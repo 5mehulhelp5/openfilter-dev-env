@@ -1,5 +1,5 @@
+import { test as base, expect } from '@playwright/test';
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 /**
@@ -37,16 +37,32 @@ export function magento(...args: string[]): string {
     : execFileSync('warden', ['env', 'exec', '-T', 'php-fpm', 'bin/magento', ...args], { cwd: repoRoot, encoding: 'utf8' });
 }
 
-/** Installed Hyvä default theme version, e.g. [1, 4, 2] (from Composer's installed.json in the store). */
+/**
+ * Storefront specs import `test` from here: the `request` fixture then carries the project's storage state (store
+ * view cookies, see tests/stores.ts), like `page` does, so HTML fetched with `request` comes from the same store view.
+ */
+export const test = base.extend({
+  request: async ({ playwright, baseURL, storageState, ignoreHTTPSErrors }, use) => {
+    const context = await playwright.request.newContext({ baseURL, storageState, ignoreHTTPSErrors });
+    await use(context);
+    await context.dispose();
+  },
+});
+export { expect };
+
+/** Hyvä default theme version of the running project as [major, minor] (project metadata, tests/stores.ts). */
 export function hyvaThemeVersion(): number[] {
-  const installed = JSON.parse(readFileSync(resolve(magentoRoot, 'vendor/composer/installed.json'), 'utf8'));
-  const packages: Array<{ name: string; version: string }> = installed.packages ?? installed;
-  const theme = packages.find((p) => p.name === 'hyva-themes/magento2-default-theme');
-  return String(theme?.version ?? '0').replace(/^v/, '').split('.').map((part) => Number.parseInt(part, 10) || 0);
+  const hyva = String(base.info().project.metadata?.hyva ?? '1.4');
+  return hyva.split('.').map((part) => Number.parseInt(part, 10) || 0);
 }
 
-/** Hyvä 1.5 rebuilt the product gallery: #gallery-main is a scrolling track inside #gallery > .relative. */
-export function isHyva15Gallery(): boolean {
+/** Hyvä 1.5 rebuilt layered navigation (details) and the product gallery (#gallery-main is a scrolling track). */
+export function isHyva15(): boolean {
   const [major, minor] = hyvaThemeVersion();
   return major > 1 || (major === 1 && minor >= 5);
+}
+
+/** Store view code of the running project ("default" when none is set). */
+export function projectStore(): string {
+  return String(base.info().project.metadata?.store ?? 'default');
 }

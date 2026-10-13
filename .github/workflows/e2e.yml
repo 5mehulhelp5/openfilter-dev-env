@@ -12,6 +12,13 @@ on:
   schedule:
     - cron: '30 2 * * *'
   workflow_dispatch:
+    inputs:
+      openfilter_ref:
+        description: openfilter branch to install (stacked PRs)
+        default: main
+      openfilter_hyva_ref:
+        description: openfilter-hyva branch to install (stacked PRs)
+        default: main
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -99,6 +106,8 @@ jobs:
           HYVA_THEME_VERSION: ${{ matrix.hyva.theme }}
           HYVA_MODULE_VERSION: ${{ matrix.hyva.module }}
           OPENFILTER_INSTALL: ${{ matrix.mode == 'readme' && 'none' || 'main' }}
+          OPENFILTER_REF: ${{ inputs.openfilter_ref || 'main' }}
+          OPENFILTER_HYVA_REF: ${{ inputs.openfilter_hyva_ref || 'main' }}
 
       - name: Install OpenFilter with the README's commands only
         if: matrix.mode == 'readme'
@@ -144,6 +153,9 @@ jobs:
 
       - name: Playwright
         working-directory: playwright
+        env:
+          # One Hyvä version per leg, installed as the default theme (locally both run as store views).
+          OF_THEMES: ${{ startsWith(matrix.hyva.theme, '1.5') && 'h15:default' || 'h14:default' }}
         run: |
           npm ci
           npx playwright install --with-deps chromium

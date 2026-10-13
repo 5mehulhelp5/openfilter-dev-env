@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Copyright (c) 2026 Iman Aboheydary. MIT License, see LICENSE.
+ *
+ * The Hyvä 1.5.2 default theme copied from the public tag is registered under its own name (the store keeps
+ * Hyvä 1.4.2 as Hyva/default), so Hyvä needs to know it is a base theme: hyva_* layout handles, CSP, view models.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Hyva\Theme\Service\HyvaThemes">
+        <arguments>
+            <argument name="hyvaBaseThemes" xsi:type="array">
+                <item name="OpenFilterFixture/hyva-1-5-2" xsi:type="boolean">true</item>
+            </argument>
+        </arguments>
+    </type>
+</config>

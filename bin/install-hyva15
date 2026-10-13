@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Local Hyvä 1.5.2 gate: copies the Hyvä default theme 1.5.2 from its public OSL tag into
+# app/design/frontend/OpenFilterFixture/hyva-1-5-2 under its own theme name (the store keeps Hyvä 1.4.2 as
+# Hyva/default). ci/fixture-data.php then creates the store view "hyva15" with this theme. Only registration.php
+# and theme.xml's title differ from the tag; CI's Hyvä 1.5.2 leg (1.5.2 as the real Hyva/default) stays the gate.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+TAG=1.5.2
+DEST=app/design/frontend/OpenFilterFixture/hyva-1-5-2
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+echo "==> Hyvä default theme $TAG from github.com/hyva-themes/magento2-default-theme"
+curl -fsSL "https://github.com/hyva-themes/magento2-default-theme/archive/refs/tags/$TAG.tar.gz" | tar xz -C "$tmp"
+rm -rf "$DEST"
+mkdir -p "$(dirname "$DEST")"
+mv "$tmp/magento2-default-theme-$TAG" "$DEST"
+sed -i.bak "s#'frontend/Hyva/default'#'frontend/OpenFilterFixture/hyva-1-5-2'#" "$DEST/registration.php"
+sed -i.bak "s#<title>Hyvä Default</title>#<title>Hyvä Default $TAG (OpenFilter fixture copy)</title>#" "$DEST/theme.xml"
+rm -f "$DEST"/*.bak
+grep -q "OpenFilterFixture/hyva-1-5-2" "$DEST/registration.php"
+if [ -n "${MAGENTO_ROOT:-}" ]; then
+  exit 0 # CI never needs the copy: its 1.5.2 leg installs 1.5.2 as Hyva/default.
+fi
+warden env exec -T php-fpm bash -lc "cd /var/www/html && bin/magento setup:upgrade --keep-generated && php ci/fixture-data.php && bin/magento indexer:reindex && bin/magento cache:flush"
