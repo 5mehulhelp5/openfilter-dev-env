@@ -10,7 +10,7 @@ const CATEGORY = '/women/tops-women.html';
 test('without JavaScript: open a closed group, pick two options, remove one chip, clear all', async ({ page }) => {
   await page.goto(CATEGORY);
   const all = productTotal(await page.content());
-  const code = await page.locator('#of-filters details.of-group:not([open]):not(.of-group--category)').first()
+  const code = await page.locator('#of-filters details.of-group:not([open]):not(.of-group--category):not(.of-group--slider)').first()
     .getAttribute('data-of-group');
   const closed = page.locator(`#of-filters details.of-group[data-of-group="${code}"]`);
   await closed.locator(':scope > summary').click();

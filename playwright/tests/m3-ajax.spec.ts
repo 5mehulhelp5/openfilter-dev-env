@@ -129,7 +129,7 @@ test('sorting and the pager swap too; the pager focuses the results', async ({ p
 async function filterBags(page: Page): Promise<import('@playwright/test').Locator> {
   await page.goto('/gear/bags.html');
   await markPage(page);
-  const group = page.locator('#of-filters details.of-group:not(.of-group--category)').first();
+  const group = page.locator('#of-filters details.of-group:not(.of-group--category):not(.of-group--slider)').first();
   const key = await group.getAttribute('data-of-group');
   await swapped(page, async () => { await (await openGroup(page, key!)).locator('a[data-of-link]').first().click(); });
   expect(await stillSamePage(page)).toBe(true);

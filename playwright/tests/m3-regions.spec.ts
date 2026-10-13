@@ -29,7 +29,9 @@ test('filter groups are native disclosures: the first three open, the others clo
   const open = await groups.evaluateAll((all) => all.map((group) => (group as HTMLDetailsElement).open));
   expect(open.slice(0, 3)).toEqual([true, true, true]);
   expect(open.slice(3)).not.toContain(true);
-  const closed = groups.nth(3);
+  const key = await page.locator('#of-filters details.of-group:not([open]):not(.of-group--slider)').first()
+    .getAttribute('data-of-group');
+  const closed = page.locator(`#of-filters details.of-group[data-of-group="${key}"]`);
   expect(await closed.locator('a[data-of-link][href]').count(), 'links of a closed group are in the DOM').toBeGreaterThan(0);
 
   await closed.locator(':scope > summary').focus();
@@ -41,7 +43,7 @@ test('filter groups are native disclosures: the first three open, the others clo
 test('an option link filters the page: the option is marked, a chip appears, the count matches', async ({ page }) => {
   const violations = collectCspViolations(page);
   await page.goto(CATEGORY);
-  const group = page.locator('#of-filters details.of-group[open]:not(.of-group--category)').first();
+  const group = page.locator('#of-filters details.of-group[open]:not(.of-group--category):not(.of-group--slider)').first();
   const option = group.locator('a[data-of-link]').first();
   const label = (await option.locator('[class$="__label"]').innerText()).trim();
   const count = Number(await option.locator('[class$="__count"]').evaluate((el) => el.firstChild?.textContent ?? '0'));
