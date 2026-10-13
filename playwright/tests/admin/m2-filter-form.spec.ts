@@ -22,6 +22,7 @@ test.afterAll(() => {
 async function openColour(page: Page): Promise<void> {
   await openAdmin(page, 'openfilter/filter/index/');
   const row = page.locator('.data-grid tbody tr.data-row').filter({ has: page.locator('td', { hasText: /^\s*Color\s*$/ }) }).first();
+  await row.locator('.action-select').click();
   await row.getByRole('link', { name: 'Edit' }).click();
   await waitForAdmin(page);
   await expect(page.locator('.page-title')).toHaveText('Filter: Color');

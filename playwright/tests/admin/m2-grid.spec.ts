@@ -33,7 +33,8 @@ test.describe('Filters grid', () => {
     const messages = page.locator('#system_messages');
     await expect(messages).toContainText(/OpenFilter found \d+ filterable attributes/);
 
-    await page.goto(await messages.getByRole('link', { name: 'Review defaults' }).first().getAttribute('href') ?? '');
+    // With several system messages Magento shows the top one and lists the others collapsed: read the link.
+    await page.goto(await messages.locator('a', { hasText: 'Review defaults' }).first().getAttribute('href') ?? '');
     await waitForAdmin(page);
     await expect(page.locator('.page-title')).toHaveText('Filters');
     await openAdmin(page, 'admin/dashboard/');
