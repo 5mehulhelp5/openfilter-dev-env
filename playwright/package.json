@@ -6,7 +6,8 @@
   "scripts": {
     "test": "playwright test",
     "report": "playwright show-report",
-    "lighthouse": "node scripts/lh-compare.mjs"
+    "lighthouse": "node scripts/lh-compare.mjs",
+    "perf": "OF_PERF=1 playwright test --project='perf-*' --workers=1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

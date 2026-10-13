@@ -29,7 +29,8 @@ test('without JavaScript: open a closed group, pick two options, remove one chip
     await expect(page.locator('#of-state a.of-chip')).toHaveCount(1);
   }
 
-  await page.locator('#of-state a.of-clear').click();
+  // A full navigation without JavaScript: wait for the new page, not just for the chips to disappear.
+  await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), page.locator('#of-state a.of-clear').click()]);
   await expect(page.locator('#of-state a.of-chip')).toHaveCount(0);
   expect(productTotal(await page.content())).toBe(all);
 });

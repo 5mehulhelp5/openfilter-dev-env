@@ -22,7 +22,7 @@ Store views: `default` (Hyvä 1.4.2), `de` (German), `hyva15` (Hyvä 1.5.2, copi
 - `./hyva` holds only the OSL/AFL-licensed Hyvä theme packages; nothing proprietary.
 - `./modules` holds the OpenFilter checkouts (`openfilter`, `openfilter-hyva`, `openfilter-hyva-bundle`), installed through a Composer path repository with version overrides (1.0.0) so `^1.0` constraints resolve.
 - On Apple Silicon the OpenSearch image is pinned to `opensearchproject/opensearch:2.5.0` (`.warden/warden-env.yml`).
-- Docker memory: run one Magento stack at a time, and never run integration tests and Playwright at the same time.
+- Docker memory: Docker Desktop has 16 GB (since 2026-10-13), so several Warden stacks (openfilter, openlabel, openimport) run side by side; within one stack, never run integration tests and Playwright at the same time.
 
 ## Playwright
 
@@ -30,6 +30,8 @@ Store views: `default` (Hyvä 1.4.2), `de` (German), `hyva15` (Hyvä 1.5.2, copi
 cd playwright && npm ci && npx playwright install chromium
 npx playwright test                          # all projects
 npx playwright test --project=desktop-h14 --project=desktop-h15
+npm run perf          # timing budgets (swap ≤ 300 ms, no long task > 50 ms), one worker
+npm run lighthouse    # OpenFilter on vs off: CLS, score, bytes (writes lighthouse-report/)
 ```
 
 Storefront projects run once per Hyvä version: `desktop-h14` / `desktop-h15`, `mobile-h14` / `mobile-h15` (`*.mobile.spec.ts`), `nojs-h14` / `nojs-h15` (`nojs/`, JavaScript disabled); `desktop-rtl` (`rtl/`) runs on store view `ar`. The `store-setup` project saves each store view's `store` and `X-Magento-Vary` cookies (never the session cookie). Specs import `test` from `tests/fixture.ts`, whose `request` fixture carries those cookies, and read the Hyvä version from the project (`isHyva15()`). `admin-chromium` (`admin/`, one login, serial). CI (`.github/workflows/e2e.yml`) builds the same store from public sources with `ci/install-fixture.sh`, one leg per Hyvä version installed as the default theme (`OF_THEMES=h14:default` or `h15:default`); `workflow_dispatch` takes `openfilter_ref` / `openfilter_hyva_ref` for stacked branches.

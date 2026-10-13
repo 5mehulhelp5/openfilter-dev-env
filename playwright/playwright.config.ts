@@ -21,11 +21,15 @@ function storefront(name: string, store: string, hyva: string, project: Project)
   };
 }
 
+// Timing budgets (@perf) need an idle machine: they run in their own projects, one worker (OF_PERF=1 --workers=1).
+const perf = !!process.env.OF_PERF;
 const themeProjects = storefrontThemes().flatMap(({ key, store, hyva }) => [
   storefront(`desktop-${key}`, store, hyva, {
     testIgnore: /admin\/|nojs\/|screenshots\/|rtl\/|\.mobile\.spec\.ts|\.setup\.ts/,
+    grepInvert: /@perf/,
     use: { ...devices['Desktop Chrome'] },
   }),
+  ...(perf ? [storefront(`perf-${key}`, store, hyva, { grep: /@perf/, testMatch: /m3-ajax\.spec\.ts/, use: { ...devices['Desktop Chrome'] } })] : []),
   storefront(`mobile-${key}`, store, hyva, { testMatch: /\.mobile\.spec\.ts/, use: { ...devices['Pixel 7'] } }),
   storefront(`nojs-${key}`, store, hyva, {
     testMatch: /nojs\/.*\.spec\.ts/,

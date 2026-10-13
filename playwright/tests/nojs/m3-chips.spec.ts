@@ -21,7 +21,7 @@ test('chips: names and values, one removal keeps the rest, Clear all keeps the s
   expect(page.url()).not.toContain('color=');
   expect(page.url()).toContain('price=20-50');
 
-  await page.locator('#of-state a.of-clear').click();
+  await Promise.all([page.waitForNavigation({ waitUntil: 'domcontentloaded' }), page.locator('#of-state a.of-clear').click()]);
   await expect(page.locator('#of-state a.of-chip')).toHaveCount(0);
   expect(new URL(page.url()).search).toBe('?product_list_order=name');
   const all = productTotal(await (await page.request.get(CATEGORY)).text());

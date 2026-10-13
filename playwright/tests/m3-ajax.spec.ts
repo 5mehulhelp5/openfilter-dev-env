@@ -151,7 +151,7 @@ test('product cards work after a swap: the wishlist button runs (guests are sent
   await expect(page.locator('body')).toContainText(/log ?in|sign ?in/i);
 });
 
-test('a cached URL swaps in at most 300 ms without long tasks over 50 ms', async ({ page }) => {
+test('a cached URL swaps in at most 300 ms without long tasks over 50 ms @perf', async ({ page }) => {
   const target = `${CATEGORY}?climate=indoor`;
   await page.request.get(target);
   await page.request.get(target); // warm Varnish

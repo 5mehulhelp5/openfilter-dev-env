@@ -166,6 +166,13 @@ jobs:
           fi
 
 
+      - name: Timing budgets (one worker)
+        if: matrix.mode == 'full'
+        working-directory: playwright
+        env:
+          OF_THEMES: ${{ startsWith(matrix.hyva.theme, '1.5') && 'h15:default' || 'h14:default' }}
+        run: npm run perf
+
       - name: Lighthouse (OpenFilter on vs off)
         if: matrix.mode == 'full'
         working-directory: playwright
