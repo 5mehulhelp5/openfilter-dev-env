@@ -30,29 +30,28 @@ test('filter groups are native disclosures: the first three open, the others clo
   expect(open.slice(0, 3)).toEqual([true, true, true]);
   expect(open.slice(3)).not.toContain(true);
   const closed = groups.nth(3);
-  expect(await closed.locator('a.of-option[href]').count(), 'links of a closed group are in the DOM').toBeGreaterThan(0);
+  expect(await closed.locator('a[data-of-link][href]').count(), 'links of a closed group are in the DOM').toBeGreaterThan(0);
 
-  await closed.locator('summary').focus();
+  await closed.locator(':scope > summary').focus();
   await page.keyboard.press('Enter');
   await expect(closed).toHaveAttribute('open');
-  await expect(closed.locator('a.of-option').first()).toBeVisible();
+  await expect(closed.locator('a[data-of-link]').first()).toBeVisible();
 });
 
 test('an option link filters the page: the option is marked, a chip appears, the count matches', async ({ page }) => {
   const violations = collectCspViolations(page);
   await page.goto(CATEGORY);
   const group = page.locator('#of-filters details.of-group[open]:not(.of-group--category)').first();
-  const option = group.locator('a.of-option').first();
-  const label = (await option.locator('.of-option__label').innerText()).trim();
-  const count = Number(await option.locator('.of-option__count').evaluate((el) => el.firstChild?.textContent ?? '0'));
+  const option = group.locator('a[data-of-link]').first();
+  const label = (await option.locator('[class$="__label"]').innerText()).trim();
+  const count = Number(await option.locator('[class$="__count"]').evaluate((el) => el.firstChild?.textContent ?? '0'));
 
   await option.click();
   await page.waitForLoadState('domcontentloaded');
 
-  const selected = page.locator('#of-filters a.of-option--selected');
+  const selected = page.locator('#of-filters a[data-of-link][aria-current="true"]');
   await expect(selected).toHaveCount(1);
-  await expect(selected).toHaveAttribute('aria-current', 'true');
-  await expect(selected.locator('.of-option__label')).toHaveText(label);
+  await expect(selected.locator('[class$="__label"]')).toHaveText(label);
   await expect(page.locator('#of-state a.of-chip')).toContainText(label);
   expect(productTotal(await page.content())).toBe(count);
   expect(violations).toEqual([]);

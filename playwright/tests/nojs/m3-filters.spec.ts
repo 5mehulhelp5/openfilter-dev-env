@@ -13,15 +13,15 @@ test('without JavaScript: open a closed group, pick two options, remove one chip
   const code = await page.locator('#of-filters details.of-group:not([open]):not(.of-group--category)').first()
     .getAttribute('data-of-group');
   const closed = page.locator(`#of-filters details.of-group[data-of-group="${code}"]`);
-  await closed.locator('summary').click();
+  await closed.locator(':scope > summary').click();
   await expect(closed).toHaveAttribute('open');
 
-  await closed.locator('a.of-option').first().click();
+  await closed.locator('a[data-of-link]').first().click();
   const group = page.locator(`#of-filters details.of-group[data-of-group="${code}"]`);
-  await expect(group.locator('a.of-option--selected')).toHaveCount(1);
+  await expect(group.locator('a[aria-current="true"]')).toHaveCount(1);
   await expect(group, 'a group with a selected value is open').toHaveAttribute('open');
 
-  const next = group.locator('a.of-option:not(.of-option--selected)').first();
+  const next = group.locator('a[data-of-link]:not([aria-current])').first();
   if (await next.count()) {
     await next.click();
     await expect(page.locator('#of-state a.of-chip')).toHaveCount(2);

@@ -37,7 +37,7 @@ export function decodeEntities(value: string): string {
 export function filterOptionLinks(html: string): Array<{ href: string; label: string; count: number }> {
   const decoded = decodeEntities(html);
   const links: Array<{ href: string; label: string; count: number }> = [];
-  const openFilter = /<a class="of-option[^"]*"\s+href="([^"]+)"[\s\S]*?of-option__label">([^<]*)<[\s\S]*?of-option__count">(\d+)/g;
+  const openFilter = /<a class="of-(?:option|swatch)[^"]*"\s+href="([^"]+)"[\s\S]*?of-(?:option|swatch)__label">([^<]*)<[\s\S]*?of-(?:option|swatch)__count">(\d+)/g;
   for (const match of decoded.matchAll(openFilter)) {
     links.push({ href: match[1], label: match[2].trim(), count: Number(match[3]) });
   }
@@ -81,6 +81,16 @@ export function productTotal(html: string): number {
     }
   }
   return 0;
+}
+
+/** Opens an OpenFilter group (native details) by its key, as a click on its summary would. */
+export async function openGroup(page: Page, key: string): Promise<Locator> {
+  const group = page.locator(`#of-filters details.of-group[data-of-group="${key}"]`);
+  if (await group.getAttribute('open') === null) {
+    await group.locator(':scope > summary').click();
+  }
+  await expect(group).toHaveAttribute('open');
+  return group;
 }
 
 /** Opens a stock Hyvä filter group (1.4: x-defer="intersect" starts the group only once it is in view). */

@@ -5,7 +5,8 @@
  * Fixture data OpenFilter's tests rely on, on top of Magento's sample data (idempotent, run from the Magento root):
  * - a German store view "de" (locale de_DE) with German colour option labels, umlauts included (slug tests);
  * - store view "hyva15" with the local Hyvä 1.5.2 copy (bin/install-hyva15; only where that theme is registered)
- *   and store view "ar" (ar_SA) with the right-to-left child theme OpenFilterFixture/hyva-rtl (M3 storefront tests);
+ *   and store view "ar" (ar_SA) with the right-to-left child theme OpenFilterFixture/hyva-rtl (M3 storefront tests),
+ *   both with the default store view's reviews and rating summaries (same catalog, another theme);
  * - catalog price rules that give NOT LOGGED IN, General, Wholesale and Retailer different prices (price slider,
  *   on-sale filter and Varnish customer-group variation tests).
  * Usage: php <path>/fixture-data.php
@@ -120,4 +121,29 @@ $builtinTable = $db->getTableName('openfilter_builtin');
 if ($db->isTableExists($builtinTable)) {
     $switched = $db->update($builtinTable, ['is_active' => 1], ['code IN (?)' => ['rating', 'sale', 'new']]);
     echo "OpenFilter built-ins switched on: $switched\n";
+}
+
+// 5. The default store view's reviews and rating summaries also on hyva15 and ar (the rating filter and the stars on
+// product cards are per store view; these store views show the same catalog with another theme).
+$defaultStoreId = (int) $storeManager->getDefaultStoreView()->getId();
+foreach (['hyva15', 'ar'] as $code) {
+    if (!isset($storeManager->getStores(false, true)[$code])) {
+        continue;
+    }
+    $id = (int) $storeManager->getStore($code)->getId();
+    $copies = [
+        'review_store' => ['review_id'],
+        'rating_store' => ['rating_id'],
+        'review_entity_summary' => ['entity_pk_value', 'entity_type', 'reviews_count', 'rating_summary'],
+        'rating_option_vote_aggregated' => ['rating_id', 'entity_pk_value', 'vote_count', 'vote_value_sum', 'percent',
+            'percent_approved'],
+    ];
+    foreach ($copies as $table => $columns) {
+        $table = $db->getTableName($table);
+        $db->delete($table, ['store_id = ?' => $id]);
+        $select = $db->select()->from($table, array_merge($columns, ['store_id' => new \Zend_Db_Expr((string) $id)]))
+            ->where('store_id = ?', $defaultStoreId);
+        $db->query($db->insertFromSelect($select, $table, array_merge($columns, ['store_id'])));
+    }
+    echo "reviews and ratings copied to $code\n";
 }
