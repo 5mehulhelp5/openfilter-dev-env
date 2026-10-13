@@ -1,0 +1,271 @@
+OpenFilter doctor, store view default
+
+OpenFilter
+  OK   OpenFilter is on for this store view
+  OK   No other layered navigation is active
+  OK   The search engine answers and has a product index — Engine opensearch, 212 fields in the product index.
+  OK   Filter counts have a strategy — single_query (engine opensearch).
+  OK   The OpenFilter cache is enabled
+  OK   Every option has a URL name
+  OK   No other module changes Magento's layered navigation
+
+category
+  OK   The filter is set to show on the storefront
+  OK   "Tops" shows layered navigation
+
+activity
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "activity"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+category_gear
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "category_gear"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+climate
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "climate"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+collar
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "collar"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+color
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "color"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+eco_collection
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "eco_collection"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+erin_recommends
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "erin_recommends"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+features_bags
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "features_bags"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+format
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "format"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+gender
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "gender"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+manufacturer
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "manufacturer"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+material
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "material"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+attribute:new
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "new"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+pattern
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "pattern"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+performance_fabric
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "performance_fabric"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+price
+  OK   The filter is set to show on the storefront
+  OK   The search index has the field "price_0_1"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+
+attribute:sale
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "sale"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+size
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "size"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+sleeve
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "sleeve"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+strap_bags
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "strap_bags"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+style_bags
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "style_bags"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+style_bottom
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "style_bottom"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: Give the products in this category a value for the attribute, then reindex.
+
+style_general
+  OK   The filter is set to show on the storefront
+  OK   The attribute is used in layered navigation on category pages
+  WARN The attribute is used in layered navigation on search result pages — "Use in Search Results Layered Navigation" is set to No.
+       Fix: Set "Use in Search Results Layered Navigation" to Yes (Storefront Properties).
+  OK   The search index has the field "style_general"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+  OK   More than one option has products here
+
+rating
+  OK   The filter is set to show on the storefront
+  OK   The search index has the field "of_rating"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 39 visible product(s) in this category have a value for this filter.
+
+stock
+  WARN The filter is set to show on the storefront — It is hidden in Catalog > OpenFilter > Filters.
+       Fix: Switch "Show on the storefront" on.
+  WARN Out-of-stock products are shown in the catalog — All listed products are in stock, so an "In stock" filter would change nothing.
+       Fix: Set "Display Out of Stock Products" to Yes in Stores > Configuration > Catalog > Inventory.
+  OK   The search index has the field "of_in_stock"
+  OK   "Tops" shows layered navigation
+  OK   Products in "Tops" match this filter — 50 visible product(s) in this category have a value for this filter.
+
+sale
+  OK   The filter is set to show on the storefront
+  OK   The search index has the field "of_on_sale_0_1"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: No product in this category qualifies yet (for example no ratings, no special prices).
+
+new
+  OK   The filter is set to show on the storefront
+  OK   The search index has the field "of_news_from"
+  OK   "Tops" shows layered navigation
+  WARN Products in "Tops" match this filter — 0 visible product(s) in this category have a value for this filter.
+       Fix: No product in this category qualifies yet (for example no ratings, no special prices).
+
+No problems found (warnings describe choices, not faults).
