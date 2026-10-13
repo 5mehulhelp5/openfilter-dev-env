@@ -53,7 +53,7 @@ jobs:
             echo "include=[$full,$readme,$hyva15]" >> "$GITHUB_OUTPUT"
           else
             echo "include=[$full,$hyva15]" >> "$GITHUB_OUTPUT"
-          fi"
+          fi
 
   e2e:
     name: ${{ matrix.mode == 'readme' && 'README install' || 'Playwright' }} · Magento 2.4.9 · Hyvä ${{ matrix.hyva.theme }}
