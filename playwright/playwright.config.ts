@@ -19,9 +19,11 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
   projects: [
-    { name: 'desktop-chromium', testIgnore: /admin\/|nojs\//, use: { ...devices['Desktop Chrome'] } },
+    { name: 'desktop-chromium', testIgnore: /admin\/|nojs\/|screenshots\//, use: { ...devices['Desktop Chrome'] } },
     { name: 'mobile-chromium', testMatch: /\.mobile\.spec\.ts/, use: { ...devices['Pixel 7'] } },
     { name: 'nojs-chromium', testMatch: /nojs\/.*\.spec\.ts/, use: { ...devices['Desktop Chrome'], javaScriptEnabled: false } },
+    // Screenshots for milestone reports (OF_SCREENSHOTS=1, local only).
+    ...(process.env.OF_SCREENSHOTS ? [{ name: 'screenshots-chromium', testMatch: /screenshots\/.*\.spec\.ts/, dependencies: ['admin-setup'], use: { ...devices['Desktop Chrome'], storageState: '.auth/admin.json' } }] : []),
     { name: 'admin-setup', testMatch: /admin\/auth\.setup\.ts/ },
     {
       name: 'admin-chromium',

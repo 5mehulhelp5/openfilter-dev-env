@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { hyvaThemeVersion } from './fixture';
+import { openFilterGroup } from './helpers';
 
 /**
  * Pins the stock Hyvä layered navigation markup OpenFilter replaces and the regions it wraps
@@ -32,8 +33,8 @@ test.describe('stock Hyvä layered navigation (M0 verification)', () => {
       expect(await firstGroup.locator('.filter-options-content a[href]').count()).toBeGreaterThan(0);
     } else {
       expect(await firstGroup.locator('a[href]').count(), 'closed group has no links in the DOM').toBe(0);
-      await firstGroup.locator('button.filter-options-title').click();
-      expect(await firstGroup.locator('.filter-options-content a[href]').count()).toBeGreaterThan(0);
+      await openFilterGroup(firstGroup);
+      await expect(firstGroup.locator('.filter-options-content a[href]').first()).toBeAttached();
     }
   });
 
@@ -45,14 +46,11 @@ test.describe('stock Hyvä layered navigation (M0 verification)', () => {
   });
 
   test('swatch filter links carry rel=nofollow and an aria-label but no visible text for colours', async ({ page }) => {
-    const swatchGroup = page.locator('.filter-option', { has: page.locator('.swatch-layered') });
-    if (!isHyva15()) {
-      await page.locator('.filter-option', { hasText: /Color/ }).locator('button.filter-options-title').click();
-    }
+    await openFilterGroup(page.locator('.filter-option', { hasText: /Color/ }).first());
     const link = page.locator('.swatch-layered a.swatch-option-link-layered').first();
     await expect(link).toHaveAttribute('rel', 'nofollow');
     await expect(link).toHaveAttribute('aria-label', /Filter Color /);
-    expect(await swatchGroup.count()).toBeGreaterThan(0);
+    expect((await link.innerText()).trim(), 'colour swatches have no visible text').toBe('');
   });
 
   test('Alpine 3 is on the page', async ({ page }) => {
