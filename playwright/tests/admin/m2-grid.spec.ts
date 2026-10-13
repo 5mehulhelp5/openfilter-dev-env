@@ -27,6 +27,20 @@ async function colorLinks(page: Page): Promise<number> {
 }
 
 test.describe('Filters grid', () => {
+  test('the first-run notice leads to the grid and goes away', async ({ page }) => {
+    sql("DELETE FROM flag WHERE flag_code = 'openfilter_defaults_reviewed'");
+    await openAdmin(page, 'admin/dashboard/');
+    const messages = page.locator('#system_messages');
+    await expect(messages).toContainText(/OpenFilter found \d+ filterable attributes/);
+
+    await page.goto(await messages.getByRole('link', { name: 'Review defaults' }).first().getAttribute('href') ?? '');
+    await waitForAdmin(page);
+    await expect(page.locator('.page-title')).toHaveText('Filters');
+    await openAdmin(page, 'admin/dashboard/');
+    await expect(page.locator('body')).not.toContainText('OpenFilter found');
+    expect(sql("SELECT COUNT(*) FROM flag WHERE flag_code = 'openfilter_defaults_reviewed'")).toEqual([['1']]);
+  });
+
   test('the menu opens one list of attribute and built-in filters', async ({ page }) => {
     await openAdmin(page, 'admin/dashboard/');
     await page.locator('#menu-magento-catalog-catalog > a').click();
