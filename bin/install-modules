@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# Installs OpenLabel 1.1 from Packagist (OpenFilter is always tested next to it) and the OpenFilter checkouts
+# from ./modules (symlinked path repository) when they exist. Both build on the shared core iranimij/module-base.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+run() { warden env exec -T php-fpm bash -lc "cd /var/www/html && $*"; }
+
+echo "==> OpenLabel 1.1 (Packagist) + iranimij/module-base"
+run "composer require --no-interaction --no-progress --no-plugins -W iranimij/module-base:^1.0 iranimij/openlabel-hyva-bundle:^1.1"
+modules="Iranimij_Base Iranimij_OpenLabel Iranimij_OpenLabelHyva"
+
+# Version overrides let the inter-package constraints (^1.0) resolve against the dev checkouts.
+packages=""
+for p in openfilter openfilter-hyva; do
+  if [ -f "modules/$p/composer.json" ]; then packages="$packages iranimij/$p:1.0.0"; fi
+done
+if [ -n "$packages" ]; then
+  echo "==> OpenFilter checkouts:$packages"
+  run "composer config repositories.openfilter '{\"type\":\"path\",\"url\":\"modules/*\",\"options\":{\"symlink\":true,\"versions\":{\"iranimij/openfilter\":\"1.0.0\",\"iranimij/openfilter-hyva\":\"1.0.0\",\"iranimij/openfilter-hyva-bundle\":\"1.0.0\"}}}'"
+  run "composer require --no-interaction --no-progress --no-plugins -W $packages"
+  case "$packages" in *openfilter:*) modules="$modules Iranimij_OpenFilter";; esac
+  case "$packages" in *openfilter-hyva:*) modules="$modules Iranimij_OpenFilterHyva";; esac
+fi
+run "bin/magento module:enable $modules && bin/magento setup:upgrade && bin/magento setup:di:compile && bin/magento hyva:config:generate && bin/magento openlabel:css:regenerate && bin/magento cache:flush"

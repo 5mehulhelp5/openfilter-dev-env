@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Adds OpenFilter's fixture data (German store view, per-group catalog price rules) to the Warden store.
+set -euo pipefail
+cd "$(dirname "$0")/.."
+echo "==> fixture data"
+warden env exec -T php-fpm bash -lc "cd /var/www/html && php ci/fixture-data.php"

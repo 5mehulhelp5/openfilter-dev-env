@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Exits 0 outside Iman's working hours (Mon–Fri 08:00–18:00 Europe/Berlin), 1 inside them.
+# Every GitHub write (push, PR, merge, tag, release, repo or milestone change) is gated by this script.
+set -euo pipefail
+dow=$(TZ=Europe/Berlin date +%u)   # 1 = Monday … 7 = Sunday
+hm=$(TZ=Europe/Berlin date +%H%M)
+if [ "$dow" -le 5 ] && [ "$((10#$hm))" -ge 800 ] && [ "$((10#$hm))" -lt 1800 ]; then
+  echo "Working hours (Mon–Fri 08:00–18:00 Europe/Berlin): no GitHub activity. Now: $(TZ=Europe/Berlin date '+%a %H:%M')" >&2
+  exit 1
+fi
