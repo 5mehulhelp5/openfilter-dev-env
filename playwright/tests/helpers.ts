@@ -30,21 +30,43 @@ export function decodeEntities(value: string): string {
     .replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&');
 }
 
-/** Layered navigation option links in server HTML (also inside Hyvä 1.4's x-if templates): href, label, count. */
+/**
+ * Layered navigation option links in server HTML: href, label, count. Reads OpenFilter's templates (M3) and Hyvä's
+ * stock templates (also inside Hyvä 1.4's x-if templates).
+ */
 export function filterOptionLinks(html: string): Array<{ href: string; label: string; count: number }> {
+  const decoded = decodeEntities(html);
   const links: Array<{ href: string; label: string; count: number }> = [];
-  const pattern = /<a\s+href="([^"]+)"[^>]*?aria-label="([^"]*?) filter, (\d+) available products?"/g;
-  for (const match of decodeEntities(html).matchAll(pattern)) {
+  const openFilter = /<a class="of-option[^"]*"\s+href="([^"]+)"[\s\S]*?of-option__label">([^<]*)<[\s\S]*?of-option__count">(\d+)/g;
+  for (const match of decoded.matchAll(openFilter)) {
+    links.push({ href: match[1], label: match[2].trim(), count: Number(match[3]) });
+  }
+  const stock = /<a\s+href="([^"]+)"[^>]*?aria-label="([^"]*?) filter, (\d+) available products?"/g;
+  for (const match of decoded.matchAll(stock)) {
     links.push({ href: match[1], label: match[2], count: Number(match[3]) });
   }
   return links;
 }
 
+/** Markup of one OpenFilter group (data-of-group="code") in server HTML, '' when absent. */
+export function groupMarkup(html: string, code: string): string {
+  const start = html.indexOf(`data-of-group="${code}"`);
+  if (start < 0) {
+    return '';
+  }
+  const end = html.indexOf('</details>', start);
+  return html.slice(start, end < 0 ? undefined : end);
+}
+
 /**
- * Stock Hyvä colour swatch filter links in server HTML: 1.4 renders `a.swatch-option-link-layered`, 1.5 renders
- * `a.swatch-option` (SwatchRenderer view model). Hrefs are decoded.
+ * Colour filter links in server HTML: OpenFilter's colour group (M3), else stock Hyvä's swatches (1.4
+ * `a.swatch-option-link-layered`, 1.5 `a.swatch-option` from the SwatchRenderer view model). Hrefs are decoded.
  */
 export function swatchLinks(html: string): string[] {
+  const colour = groupMarkup(html, 'color');
+  if (colour !== '') {
+    return filterOptionLinks(colour).map((link) => link.href);
+  }
   return [...html.matchAll(/<a\s+href="([^"]+)"[^>]*?class="swatch-option(?:-link-layered)?["\s]/g)].map((m) => decodeEntities(m[1]));
 }
 

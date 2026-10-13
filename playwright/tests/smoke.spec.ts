@@ -25,7 +25,8 @@ test.describe('fixture store baseline', () => {
     await page.goto(CATEGORY);
     expect(await page.locator('.product-item').count()).toBeGreaterThan(0);
     await expect(page.locator('.product-item').first().locator('a.product-item-photo img')).toBeVisible();
-    await expect(page.locator('[role="region"].block .filter-option').first()).toBeAttached();
+    // OpenFilter's filter groups (M3), or Hyvä's stock ones when OpenFilter is off.
+    await expect(page.locator('#of-filters .of-group, [role="region"].block .filter-option').first()).toBeAttached();
     expect(violations).toEqual([]);
   });
 
