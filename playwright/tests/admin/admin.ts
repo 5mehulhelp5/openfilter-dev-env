@@ -1,9 +1,10 @@
 import { expect, Page } from '@playwright/test';
+import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { sql } from '../fixture';
+import { magento, sql } from '../fixture';
 
-export { sql };
+export { magento, sql };
 
 /** Admin credentials from the gitignored admin.env at the repository root (or ADMIN_USER / ADMIN_PASSWORD). */
 export function adminCredentials(): { user: string; password: string } {
@@ -53,4 +54,54 @@ export async function openAdmin(page: Page, route: string): Promise<void> {
   await page.goto(`/admin/${route}`);
   await waitForAdmin(page);
   await dismissAdminPopups(page);
+}
+
+/** OpenFilter's settings and URL-name tables: admin specs snapshot them and put them back afterwards. */
+export const OPENFILTER_TABLES = [
+  'openfilter_attribute', 'openfilter_attribute_store', 'openfilter_builtin', 'openfilter_builtin_store',
+  'openfilter_option_slug', 'openfilter_attribute_slug',
+];
+
+function mysqlArgs(): { command: string; args: string[]; dumpCommand: string; dumpArgs: string[] } {
+  if (process.env.OF_FIXTURE === 'shell') {
+    const auth = ['-h', process.env.DB_HOST ?? '127.0.0.1', '-u', process.env.DB_USER ?? 'magento',
+      `-p${process.env.DB_PASSWORD ?? 'magento'}`];
+    const db = process.env.DB_NAME ?? 'magento';
+    return { command: 'mysql', args: [...auth, db], dumpCommand: 'mysqldump', dumpArgs: [...auth, db] };
+  }
+  const exec = ['env', 'exec', '-T', 'db'];
+  return {
+    command: 'warden', args: [...exec, 'mysql', '-umagento', '-pmagento', 'magento'],
+    dumpCommand: 'warden', dumpArgs: [...exec, 'mysqldump', '-umagento', '-pmagento', 'magento'],
+  };
+}
+
+/**
+ * Saves the OpenFilter tables and returns a function that restores them (data only) and cleans the caches that
+ * hold them, so admin specs leave the fixture as they found it.
+ */
+export function snapshotOpenFilter(): () => void {
+  const { command, args, dumpCommand, dumpArgs } = mysqlArgs();
+  const cwd = resolve(__dirname, '../../..');
+  const dump = execFileSync(dumpCommand, [...dumpArgs, '--no-create-info', '--skip-triggers', '--complete-insert', ...OPENFILTER_TABLES], { cwd, encoding: 'utf8' });
+  return () => {
+    const reset = `SET FOREIGN_KEY_CHECKS=0; ${OPENFILTER_TABLES.map((t) => `DELETE FROM ${t};`).join(' ')}\n`;
+    execFileSync(command, args, { cwd, input: reset + dump + '\nSET FOREIGN_KEY_CHECKS=1;\n', encoding: 'utf8' });
+    magento('cache:clean', 'openfilter', 'full_page');
+  };
+}
+
+/** A storefront URL that skips Varnish (an extra parameter OpenFilter and Magento ignore). */
+export function uncached(path: string): string {
+  return `${path}${path.includes('?') ? '&' : '?'}of_t=${Date.now()}${Math.floor(Math.random() * 1000)}`;
+}
+
+/** Ticks grid rows by their first-column text and runs a mass action from the Actions menu. */
+export async function massAction(page: Page, labels: string[], action: string): Promise<void> {
+  for (const label of labels) {
+    const row = page.locator('.data-grid tbody tr.data-row').filter({ has: page.locator('td', { hasText: new RegExp(`^\\s*${label}\\s*$`) }) }).first();
+    await row.locator('input.admin__control-checkbox').check();
+  }
+  await page.locator('.admin__data-grid-header .action-select').filter({ hasText: 'Actions' }).first().click();
+  await page.locator('.action-menu-item', { hasText: action }).first().click();
 }
