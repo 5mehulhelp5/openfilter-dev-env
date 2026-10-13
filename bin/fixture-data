@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Adds OpenFilter's fixture data (German store view, per-group catalog price rules) to the Warden store.
+# Adds OpenFilter's fixture data (German store view, per-group catalog price rules, built-in filters on) to the Warden store.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 echo "==> fixture data"
