@@ -121,6 +121,13 @@ $builtinTable = $db->getTableName('openfilter_builtin');
 if ($db->isTableExists($builtinTable)) {
     $switched = $db->update($builtinTable, ['is_active' => 1], ['code IN (?)' => ['rating', 'sale', 'new']]);
     echo "OpenFilter built-ins switched on: $switched\n";
+    // A merchant's typical SEO choice (M4): pages filtered by exactly one colour may be indexed.
+    $colorId = (int) $db->fetchOne(
+        $db->select()->from($db->getTableName('eav_attribute'), 'attribute_id')
+            ->where('attribute_code = ?', 'color')->where('entity_type_id = ?', 4)
+    );
+    $indexable = $db->update($db->getTableName('openfilter_attribute'), ['seo_indexable' => 1], ['attribute_id = ?' => $colorId]);
+    echo "OpenFilter colour indexable: $indexable\n";
 }
 
 // 5. The default store view's reviews and rating summaries also on hyva15 and ar (the rating filter and the stars on
