@@ -50,3 +50,14 @@ Finding: Hyvä's group template falls back to the list template for unknown disp
 Finding (tests): my expectations for automatic ranges were wrong twice (a bucket at display 20.00 belongs to 20–40; 10–56 gives steps of 10, not 20) — the code was right; the integration test now checks against the catalog model.
 Tests: unit 420 (NiceRanges 6, RangeListQuery 4 incl. SingleQuery wrapping, RangeListItems 4, codec ranges, PerAttribute per field, FilterBlock ranges); integration 165 (RangeListsTest 8) + performance 17/17 (−43.3 ms); coverage gate ok (Search 93 %, Url 99.5 %, ViewModel 98.5 %); PHPCS zero; PHPStan clean; Playwright admin 26/26 (m5-ranges 2 on the real store, EUR), storefront 129 + 10 skipped.
 Commits: core e4f59ae (feat/m5-s3-ranges, PR #45, matrix run 38639520862), dev-env m5-ranges spec; E2E run 38639528362 with S3.
+CI: S3 full matrix green (run 38639520862, every version and engine).
+
+## S4 · Category tree with multi-select
+Ruling: the tree replaces core's drill-down only in "Category tree" mode (list = 1.0 drill-down, unchanged); picks stay on the page (?cat=ids) and count only when below the page's category.
+Ruling: picks are one terms clause on category_ids next to the page's own category filter (CategoryPicks, taken once per request); the tree is counted by core's category_bucket with include = the tree's nodes, wrapped by SingleQuery without the picks.
+Ruling: the codec owns `cat` only in tree mode (ids validated against the cached tree, canonical order = depth-first tree order); the layer filter decides which picks are below the page.
+Finding: Magento cleans the general category tag (cat_c) only for new, deleted, moved categories or a changed include-in-menu; a plain save (rename) cleans only cat_c_<id>. The tree cache therefore carries cat_c and every category's own tag (caught by the integration test "rebuilt when a category is saved").
+Finding: StoreInterface has no getRootCategoryId(); the root comes from the store group (PHPStan + unit test).
+Finding: the tree page needs fewer SQL queries than core's drill-down (core runs getChildrenCategories per request): 100 vs 118 alone, 106 vs 125 in the suite.
+Tests: unit 427; integration 175 (CategoryTreeTest 6, BudgetTest +4: one request, tree ≤ core drill-down SQL) + performance 17/17 (−54.6 ms); coverage gate ok; PHPCS zero; PHPStan clean; Playwright admin 27/27 (m5-category-tree on Women › Tops), storefront 129 + 10 skipped.
+Commits: core f505018 (feat/m5-s4-category, PR #46, matrix 38642371107), dev-env tree spec; E2E 38642378157.
