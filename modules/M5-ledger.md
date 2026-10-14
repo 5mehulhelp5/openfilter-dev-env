@@ -72,3 +72,18 @@ Finding: Magento's escapeHtmlAttr writes spaces as &#x20; (test assertions on at
 Finding: the category picker shows a category's path ("Default Category / Women / Tops"), which tells same-named categories apart; Playwright picks by that path.
 Tests: unit 440; integration 190 (FilterVisibilityTest 7, SortAndWhereTest 8) + performance 17/17 (−34.1 ms); coverage gate ok; PHPCS zero; PHPStan clean; Playwright admin 30/30 (m5-admin 3 incl. axe on the sort list), storefront 129 + 10 skipped. Screenshots s5-sort-filters.png, s5-where-it-shows.png.
 Commits: core 2221a41 (feat/m5-s5-admin, PR #47, matrix 38646153924), dev-env m5-admin spec + screenshots; E2E 38646161170.
+CI: S5 full matrix green (run 38646153924); E2E with S5 green on Hyvä 1.4.2 and 1.5.2 (run 38646161170).
+Process fix (dev-env 44eab80): in CI every Playwright project runs in one command, so the serial admin project (whose specs change settings the storefront reads: URL names, ranges, the category tree, where filters show) could overlap the parallel storefront projects; in CI it now depends on them. Locally unchanged.
+
+## S6 · Storefront modes (Hyvä)
+Ruling: tooltips and "all must match" are a visible hint at the top of the open group (a summary must not contain a button, hover-only content fails on touch screens, and a hint needs no JavaScript) instead of an info-button popover.
+Ruling: the dropdown is a native select in a GET form: works without JavaScript (button), the option id goes through the normaliser's 301 to the canonical URL; with JavaScript a change loads in place (and is staged in apply mode, like any pick).
+Ruling: the horizontal bar moves the filter dialog to the top of the content and switches the page to one column (Hyvä keeps a sidebar column otherwise); the sidebar's other blocks are left out on those pages; groups start closed (popovers), one open at a time; phones keep the drawer.
+Ruling: the 1.1 behaviour lives in js/extras.phtml (1.49 KB gzipped), printed only on store views that use a mode; the main component got a staging hook and exports (6,090 of 6,144 bytes).
+Ruling: the sticky sidebar needs the theme's grid to let the filter sidebar span the product rows: the only theme selectors in OpenFilter's CSS, behind :has(.of-drawer--sticky) (StorefrontCssTest allows exactly that form).
+Finding: Hyvä's .columns grid sizes row 1 to the sidebar (868 px), so a sticky dialog inside it cannot move; the second sidebar fills row 2.
+Finding: printing class names through escapeHtmlAttr writes spaces as &#x20; — the 1.0 markup changed until the fixed names printed unescaped (AjaxComponentTest caught it).
+Finding: a stale "Show N products" label after Reset let a test click before staging finished — the label is cleared when the bar hides.
+Finding (tests): contexts created with browser.newContext() do not inherit the project's baseURL.
+Tests: core unit 444 (FilterBlock 4 new), hyva unit 19 (Ajax extras 5 cases, extras budget/CSP), hyva integration 34 (StorefrontModesTest 6), core integration 190 + performance 17/17 (−39.8 ms); PHPCS zero; PHPStan clean; Playwright storefront 129 + 10 skipped (defaults unchanged), admin 39/39 (m5-storefront-modes 10: desktop, phone, no-JS, axe, CSP), perf 4/4, Lighthouse on/off PASS.
+Commits: core 93eaa42 (PR #48), hyva 505d5f1 (PR openfilter-hyva#18, openfilter-ref = feat/m5-s6-storefront), dev-env b8345db; E2E 38652306373 (core + hyva S6).
