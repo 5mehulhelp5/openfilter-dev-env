@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { collectCspViolations, filterOptionLinks } from './helpers';
+import { test, expect } from './fixture';
+import { collectCspViolations, filterOptionLinks, swatchLinks } from './helpers';
 
 /**
  * M0 search spike on the storefront: with OpenFilter's facet count plugins active, a filtered category page
@@ -10,9 +10,8 @@ const CATEGORY = '/women/tops-women.html';
 
 test('filtered category page: option counts match the products their links lead to', async ({ page, request }) => {
   const start = await (await request.get(CATEGORY)).text();
-  const colour = /<a\s+href="([^"]+)"[^>]*class="swatch-option-link-layered/.exec(start);
-  expect(colour, 'a colour swatch link on the category page').not.toBeNull();
-  const filteredUrl = colour![1].replace(/&amp;/g, '&');
+  const filteredUrl = swatchLinks(start)[0];
+  expect(filteredUrl, 'a colour swatch link on the category page').toBeDefined();
 
   const filtered = await (await request.get(filteredUrl)).text();
   const options = filterOptionLinks(filtered).slice(0, 3);

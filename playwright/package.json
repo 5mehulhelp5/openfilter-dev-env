@@ -1,11 +1,13 @@
 {
   "name": "openfilter-dev-env-playwright",
   "private": true,
-  "description": "End-to-end tests for the OpenFilter fixture store (Hyvä 1.4/1.5, CSP enforced, Varnish on, OpenLabel installed)",
+  "description": "End-to-end tests for the OpenFilter fixture store (Hyv\u00e4 1.4/1.5, CSP enforced, Varnish on, OpenLabel installed)",
   "license": "MIT",
   "scripts": {
     "test": "playwright test",
-    "report": "playwright show-report"
+    "report": "playwright show-report",
+    "lighthouse": "node scripts/lh-compare.mjs",
+    "perf": "OF_PERF=1 playwright test --project='perf-*' --workers=1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",

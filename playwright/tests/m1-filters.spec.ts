@@ -1,5 +1,5 @@
-import { test, expect } from '@playwright/test';
-import { collectCspViolations, decodeEntities, filterOptionLinks } from './helpers';
+import { test, expect } from './fixture';
+import { collectCspViolations, decodeEntities, filterOptionLinks, productTotal as total, swatchLinks } from './helpers';
 
 /**
  * M1 on the stock Hyvä templates: readable multi-select filter URLs, options of an active filter stay listed with
@@ -7,11 +7,6 @@ import { collectCspViolations, decodeEntities, filterOptionLinks } from './helpe
  * URL names. (OpenFilter's own templates, AJAX and the slider arrive in M3.)
  */
 const CATEGORY = '/women/tops-women.html';
-
-function total(html: string): number {
-  const numbers = [...html.matchAll(/toolbar-number">(\d+)</g)].map((m) => Number(m[1]));
-  return numbers.length ? numbers[numbers.length - 1] : 0;
-}
 
 test('two values of one filter: other values keep counts, selected values link to their removal', async ({ request }) => {
   const html = await (await request.get(`${CATEGORY}?climate=cold,indoor`)).text();
@@ -32,8 +27,7 @@ test('two values of one filter: other values keep counts, selected values link t
 
 test('colour swatches add values in canonical order and remove selected ones', async ({ request }) => {
   const html = await (await request.get(`${CATEGORY}?color=blue`)).text();
-  const swatches = [...html.matchAll(/<a\s+href="([^"]+)"[^>]*class="swatch-option-link-layered/g)]
-    .map((m) => decodeEntities(m[1]));
+  const swatches = swatchLinks(html);
 
   expect(swatches.length).toBeGreaterThan(1);
   expect(swatches.some((href) => /[?&]color=blue,red(&|$)/.test(href)), 'red adds to blue').toBe(true);

@@ -59,6 +59,12 @@ composer install --no-interaction --no-progress --prefer-dist \
   || { echo "composer install failed, retrying once"; composer clear-cache; composer install --no-interaction --no-progress --prefer-dist; }
 echo "::endgroup::"
 
+# Fixture-only Magento code: theme registry module and the right-to-left child theme (store view "ar").
+REPO_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+mkdir -p app/code app/design/frontend/OpenFilterFixture
+cp -R "$REPO_DIR/app/code/OpenFilterFixture" app/code/
+cp -R "$REPO_DIR/app/design/frontend/OpenFilterFixture/hyva-rtl" app/design/frontend/OpenFilterFixture/
+
 echo "::group::setup:install"
 bin/magento setup:install --no-interaction \
   --base-url=http://localhost/ --backend-frontname=admin \

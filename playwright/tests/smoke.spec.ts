@@ -1,5 +1,4 @@
-import { test, expect } from '@playwright/test';
-import { magento, isHyva15Gallery } from './fixture';
+import { test, expect, magento, isHyva15 } from './fixture';
 import { collectCspViolations, firstProductUrl } from './helpers';
 
 /** Sample-data category present in every fixture build. */
@@ -26,7 +25,8 @@ test.describe('fixture store baseline', () => {
     await page.goto(CATEGORY);
     expect(await page.locator('.product-item').count()).toBeGreaterThan(0);
     await expect(page.locator('.product-item').first().locator('a.product-item-photo img')).toBeVisible();
-    await expect(page.locator('[role="region"].block .filter-option').first()).toBeAttached();
+    // OpenFilter's filter groups (M3), or Hyvä's stock ones when OpenFilter is off.
+    await expect(page.locator('#of-filters .of-group, [role="region"].block .filter-option').first()).toBeAttached();
     expect(violations).toEqual([]);
   });
 
@@ -41,7 +41,7 @@ test.describe('fixture store baseline', () => {
     const violations = collectCspViolations(page);
     await page.goto(await firstProductUrl(page, CATEGORY));
     await expect(page.locator('#gallery-main')).toBeVisible();
-    if (isHyva15Gallery()) {
+    if (isHyva15()) {
       await expect(page.locator('#gallery-main img').first()).toBeVisible();
     } else {
       await expect(page.locator('#gallery-main img').first()).toHaveAttribute('width', /\d+/);
