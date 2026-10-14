@@ -61,3 +61,14 @@ Finding: StoreInterface has no getRootCategoryId(); the root comes from the stor
 Finding: the tree page needs fewer SQL queries than core's drill-down (core runs getChildrenCategories per request): 100 vs 118 alone, 106 vs 125 in the suite.
 Tests: unit 427; integration 175 (CategoryTreeTest 6, BudgetTest +4: one request, tree ≤ core drill-down SQL) + performance 17/17 (−54.6 ms); coverage gate ok; PHPCS zero; PHPStan clean; Playwright admin 27/27 (m5-category-tree on Women › Tops), storefront 129 + 10 skipped.
 Commits: core f505018 (feat/m5-s4-category, PR #46, matrix 38642371107), dev-env tree spec; E2E 38642378157.
+CI: S4 full matrix green (run 38642371107); E2E with S4 green on Hyvä 1.4.2 and 1.5.2 (run 38642378157; S3's run was cancelled by it).
+
+## S5 · Where it shows, Sort filters, preview
+Ruling: "Where it shows" is global (like the other settings), matches the page's category and every category above it (a rule on Tops covers Tees), and never applies on search pages; stored in openfilter_filter_category (show/hide rows), read into the cached filter config — 0 extra SQL on the storefront.
+Ruling: Sort filters is its own admin page (ordered list, drag handle + Move up / Move down) instead of Magento's dynamic-rows drag, which is mouse-only; positions are written as 10, 20, 30… in one transaction; the list's ends are aria-disabled (not disabled) so focus stays on the button.
+Ruling: the preview link lives in the "Why is this filter not showing?" panel (it already picks a store view and a category) and comes from the category's URL rewrite in that store view; new dependency magento/module-url-rewrite (^102.0, core).
+Finding: FilterConfigRepository::save compared the new category rule with the "current" config, but getByCode() returns the provider's cached object, so the caller's setters had changed "current" too and the rule was never written — now always written (integration test FilterVisibilityTest found it).
+Finding: Magento's escapeHtmlAttr writes spaces as &#x20; (test assertions on attributes use the escaped form).
+Finding: the category picker shows a category's path ("Default Category / Women / Tops"), which tells same-named categories apart; Playwright picks by that path.
+Tests: unit 440; integration 190 (FilterVisibilityTest 7, SortAndWhereTest 8) + performance 17/17 (−34.1 ms); coverage gate ok; PHPCS zero; PHPStan clean; Playwright admin 30/30 (m5-admin 3 incl. axe on the sort list), storefront 129 + 10 skipped. Screenshots s5-sort-filters.png, s5-where-it-shows.png.
+Commits: core 2221a41 (feat/m5-s5-admin, PR #47, matrix 38646153924), dev-env m5-admin spec + screenshots; E2E 38646161170.
