@@ -32,6 +32,8 @@ test('right to left: the drawer opens from the right on a phone-sized window', a
   await page.goto('/women/tops-women.html');
   await page.locator('[data-of-drawer-open]').click();
   const drawer = await page.locator('#of-drawer[data-of-modal]').boundingBox();
-  expect(Math.round(drawer!.x + drawer!.width)).toBe(700);
+  // Flush with the right edge of the viewport (its width without a scroll bar: Linux CI browsers draw one).
+  const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth);
+  expect(Math.round(drawer!.x + drawer!.width)).toBe(viewportWidth);
   expect(drawer!.x).toBeGreaterThan(100);
 });

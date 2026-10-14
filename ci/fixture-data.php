@@ -154,3 +154,15 @@ foreach (['hyva15', 'ar'] as $code) {
     }
     echo "reviews and ratings copied to $code\n";
 }
+
+// 6. OpenFilter's option URL names generated again from the labels, now that the German labels exist: OpenFilter's
+// install generated them before this script added the store views, so "de" had no names of its own (Grün → gruen).
+$slugInterface = 'Iranimij\\OpenFilter\\Api\\SlugRepositoryInterface';
+$attributeTable = $db->getTableName('openfilter_attribute');
+if (interface_exists($slugInterface) && $db->isTableExists($attributeTable)) {
+    $slugs = $om->get($slugInterface);
+    foreach ($db->fetchCol($db->select()->from($attributeTable, 'attribute_id')) as $attributeId) {
+        $slugs->regenerate((int) $attributeId, null, true);
+    }
+    echo "OpenFilter URL names generated for every store view\n";
+}
