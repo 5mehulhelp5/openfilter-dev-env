@@ -32,6 +32,9 @@ test('right to left: the drawer opens from the right on a phone-sized window', a
   await page.goto('/women/tops-women.html');
   await page.locator('[data-of-drawer-open]').click();
   const drawer = await page.locator('#of-drawer[data-of-modal]').boundingBox();
-  expect(Math.round(drawer!.x + drawer!.width)).toBe(700);
+  // At the right edge of the viewport. Linux browsers with classic scroll bars leave the bar's width (15 px) free
+  // on the right while the page scroll is locked; macOS overlay bars do not.
+  const viewportWidth = await page.evaluate(() => document.documentElement.clientWidth);
+  expect(viewportWidth - Math.round(drawer!.x + drawer!.width)).toBeLessThanOrEqual(16);
   expect(drawer!.x).toBeGreaterThan(100);
 });

@@ -25,7 +25,7 @@ function storefront(name: string, store: string, hyva: string, project: Project)
 const perf = !!process.env.OF_PERF;
 const themeProjects = storefrontThemes().flatMap(({ key, store, hyva }) => [
   storefront(`desktop-${key}`, store, hyva, {
-    testIgnore: /admin\/|nojs\/|screenshots\/|rtl\/|\.mobile\.spec\.ts|\.setup\.ts/,
+    testIgnore: /admin\/|nojs\/|screenshots\/|rtl\/|readme\/|\.mobile\.spec\.ts|\.setup\.ts/,
     grepInvert: /@perf/,
     use: { ...devices['Desktop Chrome'] },
   }),
@@ -58,6 +58,9 @@ export default defineConfig({
       testMatch: /rtl\/.*\.spec\.ts/,
       use: { ...devices['Desktop Chrome'] },
     })] : []),
+    // README install gate (CI leg "README install", OF_README=1): the quick start on a store set up only with the
+    // README's commands.
+    ...(process.env.OF_README ? [{ name: 'readme-chromium', testMatch: /readme\/.*\.spec\.ts/, use: { ...devices['Desktop Chrome'] } }] : []),
     // Screenshots for milestone reports (OF_SCREENSHOTS=1, local only).
     ...(process.env.OF_SCREENSHOTS ? [{ name: 'screenshots-chromium', testMatch: /screenshots\/.*\.spec\.ts/, dependencies: ['admin-setup', storeSetup.name], use: { ...devices['Desktop Chrome'], storageState: '.auth/admin.json' } }] : []),
     { name: 'admin-setup', testMatch: /admin\/auth\.setup\.ts/ },

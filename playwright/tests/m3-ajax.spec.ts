@@ -171,7 +171,11 @@ test('a cached URL swaps in at most 300 ms without long tasks over 50 ms @perf',
   }, start);
   test.info().annotations.push({ type: 'swap', description: `click to swap ${result.total.toFixed(0)} ms, swap ${result.swap.toFixed(0)} ms, long tasks ${JSON.stringify(result.long)}` });
   expect(result.total).toBeLessThanOrEqual(300);
-  expect(result.long.filter((d) => d > 50)).toEqual([]);
+  // Long tasks are a hard gate locally; GitHub's runners record 50–100 ms tasks while Hyvä's product cards start
+  // (Iman, 2026-10-14: CI gates the 300 ms swap and records long tasks in the report).
+  if (!process.env.CI) {
+    expect(result.long.filter((d) => d > 50)).toEqual([]);
+  }
 });
 
 test('the search box narrows a long list as you type, also into "Show more", and restores it when cleared', async ({ page }) => {

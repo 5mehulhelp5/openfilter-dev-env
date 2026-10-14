@@ -121,6 +121,13 @@ $builtinTable = $db->getTableName('openfilter_builtin');
 if ($db->isTableExists($builtinTable)) {
     $switched = $db->update($builtinTable, ['is_active' => 1], ['code IN (?)' => ['rating', 'sale', 'new']]);
     echo "OpenFilter built-ins switched on: $switched\n";
+    // A merchant's typical SEO choice (M4): pages filtered by exactly one colour may be indexed.
+    $colorId = (int) $db->fetchOne(
+        $db->select()->from($db->getTableName('eav_attribute'), 'attribute_id')
+            ->where('attribute_code = ?', 'color')->where('entity_type_id = ?', 4)
+    );
+    $indexable = $db->update($db->getTableName('openfilter_attribute'), ['seo_indexable' => 1], ['attribute_id = ?' => $colorId]);
+    echo "OpenFilter colour indexable: $indexable\n";
 }
 
 // 5. The default store view's reviews and rating summaries also on hyva15 and ar (the rating filter and the stars on
@@ -146,4 +153,16 @@ foreach (['hyva15', 'ar'] as $code) {
         $db->query($db->insertFromSelect($select, $table, array_merge($columns, ['store_id'])));
     }
     echo "reviews and ratings copied to $code\n";
+}
+
+// 6. OpenFilter's option URL names generated again from the labels, now that the German labels exist: OpenFilter's
+// install generated them before this script added the store views, so "de" had no names of its own (Grün → gruen).
+$slugInterface = 'Iranimij\\OpenFilter\\Api\\SlugRepositoryInterface';
+$attributeTable = $db->getTableName('openfilter_attribute');
+if (interface_exists($slugInterface) && $db->isTableExists($attributeTable)) {
+    $slugs = $om->get($slugInterface);
+    foreach ($db->fetchCol($db->select()->from($attributeTable, 'attribute_id')) as $attributeId) {
+        $slugs->regenerate((int) $attributeId, null, true);
+    }
+    echo "OpenFilter URL names generated for every store view\n";
 }
