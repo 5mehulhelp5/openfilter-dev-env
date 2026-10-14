@@ -38,3 +38,15 @@ Note: hyva #17 (other session, openfilter-ref → main) was blocked for an hour 
 Tests: unit 403 (AndLogic 4); integration 157 (AndLogicCountsTest 9: both oracles × both strategies × category/search, German store view, groups; Budget "all of" = 1 request); PHPCS zero; PHPStan clean; Playwright admin 24/24 (m5-and-logic 2 on the real store: style counts = page sizes, any-of widens), storefront 129 + 10 skipped.
 Deferred to S6: the "All must match" hint in the group (Hyvä template).
 Commits: core 89860c7 + docs (feat/m5-s2-and-logic, PR #44, full matrix run 38636444647), dev-env a86d9b7.
+CI: S1 full matrix green (run 38635247827), S2 full matrix green incl. 2.4.7 + ES8 (run 38636444647), E2E with S1 green on Hyvä 1.4.2 and 1.5.2 (run 38634645550). hyva #17 merged after the re-run (M4 closed).
+
+## S3 · Price and decimal ranges as a list
+Ruling: ranges are [from, to) for filtering and counting ("€0.00 - €39.99" labels, a cent below the bound for prices), unlike the 1.0 slider's inclusive upper bound; a single picked range in "Ranges" mode follows [from, to) too — cost if wrong: one clause builder.
+Ruling: automatic ranges = about five, step 1/2/5 × 10^n of (max − min)/5, first bound floored to the step, last range open; computed from a histogram one display unit wide (offset a thousandth down so values on a bound land in the bucket that starts there) in the same request — no extra request like core's automatic ranges need.
+Ruling: picked ranges narrow core's request to their outer bounds (core holds one range per field); RangeListQuery swaps that clause for the exact "any of" clause in the engine query and registers a clause-less facet filter so SingleQuery counts the range aggregation without the price pick.
+Ruling: PerAttribute groups facet filters by field: one count request per active field with all its aggregations (same numbers as before for one bucket per field; no extra request for the ranges aggregation).
+Ruling: the layer filter hands its ranges to the mapper through RangeLists (request-scoped), and the registration is taken once, so a later request in the same process cannot inherit it.
+Finding: Hyvä's group template falls back to the list template for unknown display types, so ranges render as options before S6's own template.
+Finding (tests): my expectations for automatic ranges were wrong twice (a bucket at display 20.00 belongs to 20–40; 10–56 gives steps of 10, not 20) — the code was right; the integration test now checks against the catalog model.
+Tests: unit 420 (NiceRanges 6, RangeListQuery 4 incl. SingleQuery wrapping, RangeListItems 4, codec ranges, PerAttribute per field, FilterBlock ranges); integration 165 (RangeListsTest 8) + performance 17/17 (−43.3 ms); coverage gate ok (Search 93 %, Url 99.5 %, ViewModel 98.5 %); PHPCS zero; PHPStan clean; Playwright admin 26/26 (m5-ranges 2 on the real store, EUR), storefront 129 + 10 skipped.
+Commits: core e4f59ae (feat/m5-s3-ranges, PR #45, matrix run 38639520862), dev-env m5-ranges spec; E2E run 38639528362 with S3.
