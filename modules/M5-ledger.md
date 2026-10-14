@@ -26,3 +26,15 @@ Finding: FilterForm::field() merged its defaults over the given settings (a text
 Finding: the I18n test reads PHP and etc/*.xml only; UI-component form phrases are added to en_US/de_DE by hand.
 Tests: unit 399 (RangeList 14 cases, Config 9 new getters, Validator 17 new cases, schema v2, exporter/importer v1 + "and"); integration 147/147 (+6: 1.1 settings persisted/validated, tooltips per store view + label clear keeps tooltip, per-category table, form logic/tooltip per scope, defaults = 1.0) + performance 17/17 (server time −35.4 ms); PHPCS zero; PHPStan clean; Playwright admin 22/22 (m5-config 4), storefront 129 + 10 skipped by design.
 Commits: core e6e4dc5 (feat/m5-s1-config, PR #43 on #42), dev-env aa4a7d1. setup:upgrade applied on the fixture (columns ranges, tree_depth, builtin_store.tooltip, table openfilter_filter_category).
+S1 fix-up: the unit UninstallTest pins the dropped tables; the new table was added to Uninstall without the test (caught by the S2 unit run) — fixed on S1 (0f3738e), S2 rebased; the first S1 matrix (old commit) cancelled and re-dispatched (run 38635247827).
+
+## S2 · Products must match all of the picked values
+Ruling: AND is applied by adding one term clause per picked value next to core's terms filter (core's request holds one filter per field) in MapperPlugin through Model/Search/AndLogic; the attribute leaves the disjunctive facet filters, so every count includes it ("an option's count = products that have it as well") — cost if wrong: one class.
+Ruling: the AND set is read from FilterConfigProvider for the current store view (logic is global; the provider is cached, 0 SQL on a warm cache).
+Finding: Luma's configurables carry their children's colours and sizes in the index, so M1Catalog already holds products with several values per attribute (no new fixture).
+Finding: BudgetTest's SQL comparison needs OpenFilter's cache warm; a test that saves a filter before it made the comparison 129 vs 118 — the new "all of" budget test runs last (alone: 112 = 112).
+Finding: re-dispatching E2E on the same dev-env branch cancels the run before it (concurrency group): S0's E2E was cancelled by S1's, which contains it.
+Note: hyva #17 (other session, openfilter-ref → main) was blocked for an hour by an HTTP 429 from api.github.com in Composer (Unit 2.4.7 / PHP 8.2); re-ran the failed job (auto-merge on).
+Tests: unit 403 (AndLogic 4); integration 157 (AndLogicCountsTest 9: both oracles × both strategies × category/search, German store view, groups; Budget "all of" = 1 request); PHPCS zero; PHPStan clean; Playwright admin 24/24 (m5-and-logic 2 on the real store: style counts = page sizes, any-of widens), storefront 129 + 10 skipped.
+Deferred to S6: the "All must match" hint in the group (Hyvä template).
+Commits: core 89860c7 + docs (feat/m5-s2-and-logic, PR #44, full matrix run 38636444647), dev-env a86d9b7.
