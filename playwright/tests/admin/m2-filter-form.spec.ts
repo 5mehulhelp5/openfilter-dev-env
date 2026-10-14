@@ -42,7 +42,8 @@ test.describe('Filter form', () => {
   test('a German label and a German URL name reach the German storefront', async ({ page }) => {
     expect(await germanPage(page)).toMatch(/[?&]color=schwarz[&"]/);
 
-    await openColour(page);
+    // Since M5 S0 a store view's own label and URL names are edited in that store view's scope.
+    await openAdmin(page, `openfilter/filter/edit/code/color/store/${de}/`);
     await page.locator(`input[name="label_${de}"]`).fill('Farbton');
     await page.locator(`input[name="option_urls[0][url_name_${de}]"]`).fill('dunkel');
     await page.locator('#save').click();
