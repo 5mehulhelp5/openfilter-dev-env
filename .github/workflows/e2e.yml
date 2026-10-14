@@ -14,11 +14,11 @@ on:
   workflow_dispatch:
     inputs:
       openfilter_ref:
-        description: openfilter branch to install (stacked PRs)
-        default: main
+        description: openfilter branch to install (stacked PRs); empty = ci/openfilter-refs
+        default: ''
       openfilter_hyva_ref:
-        description: openfilter-hyva branch to install (stacked PRs)
-        default: main
+        description: openfilter-hyva branch to install (stacked PRs); empty = ci/openfilter-refs
+        default: ''
       readme:
         description: also run the README install leg (needs the packages on Packagist)
         type: boolean
@@ -112,20 +112,34 @@ jobs:
           sudo mkdir -p "$MAGENTO_ROOT" && sudo chown runner:runner "$MAGENTO_ROOT"
           php -v
 
+      # Branches of OpenFilter this run installs: the dispatch inputs, else ci/openfilter-refs (a branch of this
+      # repository whose specs need unmerged OpenFilter work names it there; main otherwise).
+      - name: OpenFilter refs
+        id: refs
+        run: |
+          core=$(sed -n 's/^openfilter=//p' ci/openfilter-refs 2>/dev/null)
+          hyva=$(sed -n 's/^openfilter-hyva=//p' ci/openfilter-refs 2>/dev/null)
+          echo "core=${INPUT_CORE:-${core:-main}}" >> "$GITHUB_OUTPUT"
+          echo "hyva=${INPUT_HYVA:-${hyva:-main}}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+        env:
+          INPUT_CORE: ${{ inputs.openfilter_ref }}
+          INPUT_HYVA: ${{ inputs.openfilter_hyva_ref }}
+
       - name: Fixture store
         run: ci/install-fixture.sh
         env:
           HYVA_THEME_VERSION: ${{ matrix.hyva.theme }}
           HYVA_MODULE_VERSION: ${{ matrix.hyva.module }}
           OPENFILTER_INSTALL: ${{ matrix.mode == 'readme' && 'none' || 'main' }}
-          OPENFILTER_REF: ${{ inputs.openfilter_ref || 'main' }}
-          OPENFILTER_HYVA_REF: ${{ inputs.openfilter_hyva_ref || 'main' }}
+          OPENFILTER_REF: ${{ steps.refs.outputs.core }}
+          OPENFILTER_HYVA_REF: ${{ steps.refs.outputs.hyva }}
 
       - name: Install OpenFilter with the README's commands only
         if: matrix.mode == 'readme'
         run: ci/readme-install.sh
         env:
-          OPENFILTER_REF: ${{ inputs.openfilter_ref || 'main' }}
+          OPENFILTER_REF: ${{ steps.refs.outputs.core }}
           OPENFILTER_CONSTRAINT: ${{ inputs.openfilter_constraint || '' }}
 
       - name: Serve (nginx :8080, Varnish :80)
