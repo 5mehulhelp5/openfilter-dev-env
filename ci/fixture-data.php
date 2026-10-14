@@ -88,3 +88,11 @@ foreach ($rules as $group => [$groupId, $percent]) {
     $repository->save($rule);
     echo "rule created: $name\n";
 }
+
+// 4. OpenFilter's built-in filters rating, on sale and new switched on (defaults: off), when OpenFilter is installed.
+// In stock stays off: the fixture hides out-of-stock products, so the filter would have nothing to do.
+$builtinTable = $db->getTableName('openfilter_builtin');
+if ($db->isTableExists($builtinTable)) {
+    $switched = $db->update($builtinTable, ['is_active' => 1], ['code IN (?)' => ['rating', 'sale', 'new']]);
+    echo "OpenFilter built-ins switched on: $switched\n";
+}
