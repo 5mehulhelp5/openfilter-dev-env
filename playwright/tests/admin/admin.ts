@@ -59,7 +59,7 @@ export async function openAdmin(page: Page, route: string): Promise<void> {
 /** OpenFilter's settings and URL-name tables: admin specs snapshot them and put them back afterwards. */
 export const OPENFILTER_TABLES = [
   'openfilter_attribute', 'openfilter_attribute_store', 'openfilter_builtin', 'openfilter_builtin_store',
-  'openfilter_option_slug', 'openfilter_attribute_slug',
+  'openfilter_option_slug', 'openfilter_attribute_slug', 'openfilter_filter_category',
 ];
 
 function mysqlArgs(): { command: string; args: string[]; dumpCommand: string; dumpArgs: string[] } {
