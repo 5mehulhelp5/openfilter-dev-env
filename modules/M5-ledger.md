@@ -143,3 +143,17 @@ Upgrade gate: dev-env playwright/scripts/upgrade-gate.mjs captures 10 pages (sta
 Docs: every 1.1 feature is in admin/filters/storefront/seo/graphql/import-export/benchmark; README states what 1.1 adds; dev-env docs/release-1.1.md.
 Open for Iman: the README comparison says Amasty's AJAX is "stated as not supported" on Hyvä (checked 2026-10-13); a 2026-10-15 search result quotes Amasty as "fully compatible with Hyva Theme" (their page refused automated reading) — recheck before 1.0's README goes out.
 Commits: core PR #55, hyva PR #21, dev-env 70a365b; matrix 38667946019.
+
+## Review #1 (QA, UX and product, 2026-10-15) · fixes
+Source: Notion "Review #1 · QA, UX and product (M5 tip, 2026-10-15)". 1.0 findings fixed on main, 1.1 findings in S13.
+1.0 (main): core #56 (selected-option count `.of-state__count`, en dash in price/decimal range labels, drawer "Clear all" hidden without chips, phone bar layout, docs), hyva #22 (card swatches preselected from the picks on Hyvä 1.4 and 1.5 without a gallery jump, no scroll after an option pick, visible product count), dev-env #7 (review1 specs desktop + mobile).
+Finding: Hyvä 1.4 and 1.5 build product-card swatches differently (1.4 `initConfigurableSwatchOptions_<id>()`, 1.5 `[data-product-id]` + `applySelectionToLinks`); the fix listens for `listing-configurable-selection-changed` and suppresses `updateGallery` while it corrects the selection.
+
+## S13 · Review #1 fixes (1.1)
+Admin: grid columns Order, Products must match, Where it shows; mass actions "Show on search pages" / "Hide on search pages"; grid warnings from Model\Admin\FilterHints (filters that never show, search pages without filters); doctor check `search_page_filters` (no attribute used on search pages); sticky no longer depends on the sidebar layout (it applies to the top bar too); config groups renamed "SEO" and "Filter counts"; SEO template character counter (title 60, description 160); read-only option cells as text, not greyed inputs; Why panel last in the form and scrolled into view; Sort filters page search + sticky save; swatches show 12 options before "Show more" by default.
+Storefront (hyva): apply bar fixed at the bottom of the window (moved to body), horizontal bar on one row with "More filters (N)" / "Fewer filters", group hint and an "About" tooltip (`details.of-about`), popover 20rem, plain caret; JS comments moved into PHP comments so they never reach the page (main script 5,690 B, extras 1,990 B gzipped budget unchanged).
+Finding: Magento's dynamic rows fade disabled cells to half opacity (2.7:1 contrast) — read-only text cells reset it (axe on the store-view option table).
+Finding (test): with the grid warnings above it, checking a row below the fold switches on Magento's sticky grid header, which hides the toolbar's Actions button; the mass-action helper scrolls back to the top first.
+Tests: core unit 492, hyva unit 21; integration core 213 + hyva 36 + performance 17/17 (−38.9 ms); Playwright storefront 141 + 12 skipped, admin 46/46; PHPCS zero, PHPStan clean, coverage gate ok.
+Commits: core PR #57 (base feat/m5-s12-close), hyva PR #23, dev-env 2ca64e1 + refs cbc2bbb; M5 stacks rebased onto main after #56/#22 (trees unchanged). Matrix 38749945535, E2E + bench 38749950601.
+Not done (Iman's call): smarter default filter order for new installs (changes what shoppers see), collapsed Why status line, SEO template live preview, screenshot comparisons.
