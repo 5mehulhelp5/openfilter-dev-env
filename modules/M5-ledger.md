@@ -112,3 +112,18 @@ Finding: labels are stored as HTML (`Cocona&reg;`); GraphQL answers text. Yes/No
 Finding (PHPStan): getStoreLabel()/setStoreId() are not on AbstractAttribute; SourceInterface::getAllOptions() takes no argument; category UIDs via Magento's Uid.
 Tests: unit 481 (AggregationsBuilder 6, RangeFilters 3, ProductsPlugin 2, resolver 2, collector gating, CategoryRule 6); coverage gate adds Model/GraphQl (96.2 %); integration 207 (GraphQl\AggregationsTest 8 vs the catalog model, both strategies) + hyva 34 + performance 17/17 (−36.8 ms); Playwright storefront 129 + 10 skipped, admin 41/41, perf 4/4, Lighthouse PASS; PHPCS zero, PHPStan clean, mkdocs --strict.
 Commits: core feat/m5-s8-graphql (PR #50, matrix 38660915468).
+Fix (CI, S8): the standalone unit run has no generated ContextExtensionInterface::getStore(), so the resolver and plugin now take the store view from the store manager (GraphQL sets it from the Store header); matrix re-run 38662123789.
+
+## S9 · REST
+Ruling: PUT changes only the fields it sends — FilterConfig records which setters ran (Magento's input processor calls one per request field), FilterConfigManagement copies only those onto the stored filter. A GET object cannot be sent back as is (read-only fields are refused with 400), and full-replace PUT would silently reset omitted settings.
+Ruling: the config document travels as a JSON string (free-form JSON has no web API type) with a typed result (applied, changes, errors); import is a dry run unless `dryRun: false`. Every route needs Iranimij_OpenFilter::filters.
+Finding: "Where it shows" (category_mode, category_ids) was missing from the config export/import since S5 — added to schema 2 (unreleased); lists diff as one value so a removed id shows.
+Finding: the S8 CI unit failure (generated extension interface) — see above.
+Tests: unit 489; integration 212 (Api\RestApiTest 5) + hyva 34 + performance 17/17 (−37.4 ms); Playwright admin 42/42 (m5-rest over HTTP), storefront 130 + 12 skipped.
+Commits: core f4c6154 (PR #51), dev-env af99c04.
+
+## S10 · Headless example
+Ruling: one static page (index.html, app.js, style.css; plain JavaScript, no build, no dependencies, ~13 KB) in openfilter/examples/headless, served by the fixture at /openfilter-headless/index.html (symlink in ci/install-fixture.sh and bin/install-modules); URLs in the storefront's format so headless and Magento pages share links.
+Finding (test): groups after the third start collapsed; the spec opens them like a shopper.
+Tests: Playwright m5-headless 2 (desktop-h14 only, theme-independent): filters and counts = GraphQL for the same picks, disjunctive counts after a pick, URL format, deep link, axe, no page errors. Screenshot docs/m5-screenshots/s10-headless-example.png.
+Commits: core edc5cbb (PR #52), dev-env 43b3fcf (ci/openfilter-refs = feat/m5-s10-headless / hyva feat/m5-s7-seo); E2E 38663598344.
