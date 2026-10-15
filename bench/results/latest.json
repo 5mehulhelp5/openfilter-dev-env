@@ -1,0 +1,94 @@
+{
+  "date": "2026-10-15T01:40:20.051Z",
+  "base": "https://app.openfilter.test",
+  "runs": 11,
+  "magento": "Magento CLI 2.4.9",
+  "modes": {
+    "magento": {
+      "category page": {
+        "supported": true,
+        "url": "/women/tops-women.html",
+        "engineRequests": 4,
+        "serverMs": 189.2
+      },
+      "one filter": {
+        "supported": true,
+        "url": "/women/tops-women.html?color=49",
+        "engineRequests": 4,
+        "serverMs": 172.9
+      },
+      "three filters": {
+        "supported": true,
+        "url": "/women/tops-women.html?color=49&size=168&price=30-40",
+        "engineRequests": 4,
+        "serverMs": 159.2
+      },
+      "two values of one filter": {
+        "supported": false,
+        "note": "Magento: one value per filter (color=50 replaces black)"
+      },
+      "search page": {
+        "supported": true,
+        "url": "/catalogsearch/result/?q=jacket",
+        "engineRequests": 4,
+        "serverMs": 168.7
+      },
+      "search with a filter": {
+        "supported": true,
+        "url": "/catalogsearch/result/?q=jacket&color=49",
+        "engineRequests": 4,
+        "serverMs": 170
+      },
+      "session": {
+        "pages": 5,
+        "varnishHits": 5
+      }
+    },
+    "openfilter": {
+      "category page": {
+        "supported": true,
+        "url": "/women/tops-women.html",
+        "engineRequests": 1,
+        "serverMs": 171.2
+      },
+      "one filter": {
+        "supported": true,
+        "url": "/women/tops-women.html?color=black",
+        "engineRequests": 1,
+        "serverMs": 170.7
+      },
+      "three filters": {
+        "supported": true,
+        "url": "/women/tops-women.html?color=black&price=30-40&size=m",
+        "engineRequests": 1,
+        "serverMs": 160.2
+      },
+      "two values of one filter": {
+        "supported": true,
+        "url": "/women/tops-women.html?color=black,blue",
+        "engineRequests": 1,
+        "serverMs": 175.3
+      },
+      "search page": {
+        "supported": true,
+        "url": "/catalogsearch/result/?q=jacket",
+        "engineRequests": 1,
+        "serverMs": 159.8
+      },
+      "search with a filter": {
+        "supported": true,
+        "url": "/catalogsearch/result/?q=jacket&color=black",
+        "engineRequests": 1,
+        "serverMs": 164.5
+      },
+      "session": {
+        "pages": 6,
+        "varnishHits": 6
+      }
+    }
+  },
+  "openFilterBytes": {
+    "jsGzip": 6120,
+    "cssGzip": 2951
+  }
+}

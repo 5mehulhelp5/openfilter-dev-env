@@ -26,6 +26,10 @@ on:
       openfilter_constraint:
         description: version constraint for the README leg's composer require, e.g. "^1.0@RC" for a release candidate
         default: ''
+      bench:
+        description: also run the public benchmark (bench/run.mjs, OpenFilter off vs on) as a gate and attach its results
+        type: boolean
+        default: false
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -207,6 +211,13 @@ jobs:
         working-directory: playwright
         run: npm run lighthouse
 
+      - name: Benchmark (OpenFilter off vs on)
+        if: matrix.mode == 'full' && inputs.bench
+        env:
+          OPENSEARCH_URL: http://127.0.0.1:9200
+          BENCH_GATE: '1'
+        run: node bench/run.mjs
+
       - name: Reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -215,5 +226,6 @@ jobs:
           path: |
             playwright/playwright-report
             playwright/lighthouse-report
+            bench/results
             ${{ env.MAGENTO_ROOT }}/var/log
           retention-days: 14
