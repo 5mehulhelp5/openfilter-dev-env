@@ -12,7 +12,7 @@ test('chips: names and values, one removal keeps the rest, Clear all keeps the s
   const chips = page.locator('#of-state a.of-chip');
   await expect(chips).toHaveCount(3);
   await expect(chips.filter({ hasText: 'Color' })).toHaveText(/Color: Blue/);
-  await expect(chips.filter({ hasText: 'Price' })).toHaveText(/Price: €20\.00 - €50\.00/);
+  await expect(chips.filter({ hasText: 'Price' })).toHaveText(/Price: €20\.00 – €50\.00/);
   await expect(chips.filter({ hasText: 'Rating' })).toHaveText(/Rating: 4 stars & up/);
   await expect(chips.filter({ hasText: 'Color' })).toHaveAttribute('aria-label', 'Remove filter Color: Blue');
 
