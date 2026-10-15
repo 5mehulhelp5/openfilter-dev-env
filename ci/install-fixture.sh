@@ -93,6 +93,10 @@ php "$SCRIPT_DIR/fixture-data.php"
 bin/magento indexer:reindex
 bin/magento openlabel:css:regenerate
 bin/magento cache:flush
+# OpenFilter's headless example (1.1) at /openfilter-headless/index.html, next to /graphql.
+if [ -d vendor/iranimij/openfilter/examples/headless ]; then
+  ln -sfn ../vendor/iranimij/openfilter/examples/headless pub/openfilter-headless
+fi
 echo "::endgroup::"
 
 echo "::group::Varnish VCL"

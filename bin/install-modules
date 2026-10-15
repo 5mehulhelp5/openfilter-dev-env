@@ -21,4 +21,6 @@ if [ -n "$packages" ]; then
   case "$packages" in *openfilter:*) modules="$modules Iranimij_OpenFilter";; esac
   case "$packages" in *openfilter-hyva:*) modules="$modules Iranimij_OpenFilterHyva";; esac
 fi
+# OpenFilter's headless example (1.1) at /openfilter-headless/index.html, next to /graphql.
+run "[ ! -d vendor/iranimij/openfilter/examples/headless ] || ln -sfn ../vendor/iranimij/openfilter/examples/headless pub/openfilter-headless"
 run "bin/magento module:enable $modules && bin/magento setup:upgrade && bin/magento setup:di:compile && bin/magento hyva:config:generate && bin/magento openlabel:css:regenerate && bin/magento cache:flush"
