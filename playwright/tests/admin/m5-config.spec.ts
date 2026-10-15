@@ -90,7 +90,8 @@ test.describe('1.1 store settings', () => {
       await page.locator('#openfilter_display_layout_inherit').uncheck();
     }
     await layout.selectOption('horizontal');
-    await expect(page.locator('#openfilter_display_sticky')).toBeHidden();
+    // Sticky applies to the top bar as well, so it stays available with the horizontal layout.
+    await expect(page.locator('#openfilter_display_sticky')).toBeVisible();
     const title = page.locator('#openfilter_seo_meta_title');
     if (await title.isDisabled()) {
       await page.locator('#openfilter_seo_meta_title_inherit').uncheck();

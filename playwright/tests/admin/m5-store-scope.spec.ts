@@ -71,7 +71,9 @@ test.describe('Filter form per store view', () => {
     await expect(page.locator('select[name="display_mode"]')).toBeDisabled();
     await expect(page.locator('input[name="visible_options"]')).toBeDisabled();
     await expect(page.locator('input[name="url_name"]')).toBeDisabled();
-    await expect(page.locator('input[name="option_urls[0][url_name_0]"]')).toBeDisabled();
+    // Values that cannot be changed here are text, not greyed inputs (Review #1).
+    await expect(page.locator('input[name="option_urls[0][url_name_0]"]')).toHaveCount(0);
+    await expect(page.locator('tr.data-row').first().locator('.openfilter-row-text', { hasText: /^black$/ })).toBeVisible();
     await expect(page.locator(`input[name="option_urls[0][url_name_${de}]"]`)).toHaveValue('schwarz');
     await expect(page.locator('input[name="url_name_store"]')).toHaveAttribute('placeholder', 'Same as for all store views');
     await expect(page.locator('#reset')).toHaveCount(0);

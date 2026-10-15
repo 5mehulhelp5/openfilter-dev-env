@@ -36,7 +36,7 @@ test('the merchant\'s ranges: counts equal their pages, two picks add up', async
   price('0-40,40-60,60-');
   const html = await page(request);
   const options = ranges(html);
-  expect(options.map((o) => o.label)).toEqual(expect.arrayContaining([expect.stringMatching(/^\D?0\.00 - \D?39\.99$/)]));
+  expect(options.map((o) => o.label)).toEqual(expect.arrayContaining([expect.stringMatching(/^\D?0\.00 – \D?39\.99$/)]));
   expect(groupMarkup(html, 'price')).not.toContain('of-slider');
   expect(options.reduce((sum, o) => sum + o.count, 0), 'every product in exactly one range').toBe(productTotal(html));
 

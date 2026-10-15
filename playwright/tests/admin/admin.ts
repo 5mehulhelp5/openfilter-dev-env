@@ -102,6 +102,8 @@ export async function massAction(page: Page, labels: string[], action: string): 
     const row = page.locator('.data-grid tbody tr.data-row').filter({ has: page.locator('td', { hasText: new RegExp(`^\\s*${label}\\s*$`) }) }).first();
     await row.locator('input.admin__control-checkbox').check();
   }
+  // Checking a row below the fold turns on the grid's sticky header, which hides the toolbar's own Actions button.
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.locator('.admin__data-grid-header .action-select').filter({ hasText: 'Actions' }).first().click();
   await page.locator('.action-menu-item', { hasText: action }).first().click();
 }
