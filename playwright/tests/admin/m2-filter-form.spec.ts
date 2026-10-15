@@ -59,13 +59,15 @@ test.describe('Filter form', () => {
 
   test('a URL name used twice is refused and nothing is saved', async ({ page }) => {
     await openColour(page);
-    await page.locator('input[name="visible_options"]').fill('2');
+    const visible = page.locator('input[name="visible_options"]');
+    const before = await visible.inputValue();
+    await visible.fill('2');
     await page.locator('input[name="option_urls[1][url_name_0]"]').fill('black');
     await page.locator('#save').click();
     await waitForAdmin(page);
 
     await expect(page.locator('.message-error')).toContainText('Another option of this filter already uses the URL name "black".');
-    await expect(page.locator('input[name="visible_options"]')).toHaveValue('6');
+    await expect(page.locator('input[name="visible_options"]')).toHaveValue(before);
     await expect(page.locator('input[name="option_urls[1][url_name_0]"]')).toHaveValue('blue');
   });
 });
