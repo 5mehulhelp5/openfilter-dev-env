@@ -109,12 +109,16 @@ jobs:
           sudo apt-get install -yq php8.3-fpm php8.3-cli php8.3-bcmath php8.3-curl php8.3-gd php8.3-intl \
             php8.3-mbstring php8.3-mysql php8.3-soap php8.3-xml php8.3-zip nginx varnish
           sudo update-alternatives --set php /usr/bin/php8.3
+          # The runner image ships Xdebug: it slows every request, skews the benchmark's server times and aborts
+          # Magento's deep layout stacks at 256 frames (HTTP 500 on search pages with Magento's own filters).
+          sudo phpdismod -v 8.3 -s ALL xdebug 2>/dev/null || true
           for ini in /etc/php/8.3/cli/php.ini /etc/php/8.3/fpm/php.ini; do
             sudo sed -i 's/^memory_limit = .*/memory_limit = 4G/; s/^;*realpath_cache_size = .*/realpath_cache_size = 10M/' "$ini"
           done
           sudo sed -i "s/^user = www-data/user = runner/; s/^group = www-data/group = runner/" /etc/php/8.3/fpm/pool.d/www.conf
           sudo mkdir -p "$MAGENTO_ROOT" && sudo chown runner:runner "$MAGENTO_ROOT"
           php -v
+          ! php -m | grep -qi xdebug
 
       # Branches of OpenFilter this run installs: the dispatch inputs, else ci/openfilter-refs (a branch of this
       # repository whose specs need unmerged OpenFilter work names it there; main otherwise).
