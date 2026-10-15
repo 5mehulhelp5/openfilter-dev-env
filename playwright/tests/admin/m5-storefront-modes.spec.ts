@@ -83,8 +83,12 @@ test.describe('sidebar modes', () => {
   test('hint, tree and dropdown render; axe and CSP clean', async ({ page }) => {
     const csp = await open(page);
     const style = page.locator('[data-of-group="style_general"]');
-    await expect(style.locator('.of-group__hint')).toContainText('Products have all picked values.');
-    await expect(style.locator('.of-group__hint')).toContainText('A product has each style you pick.');
+    await expect(style.locator('.of-group__match')).toHaveText('Products have all picked values.');
+    const about = style.locator('details.of-about');
+    await expect(about.locator('summary')).toHaveText(/^About /);
+    await expect(about.locator('.of-group__hint')).toBeHidden();
+    await about.locator('summary').click();
+    await expect(about.locator('.of-group__hint')).toHaveText('A product has each style you pick.');
     await expect(page.locator('[data-of-group="category"] .of-options__item').first()).toBeVisible();
     await expect(page.locator('[data-of-group="climate"] select[data-of-dropdown-select]')).toBeAttached();
     await expect(page.locator('[data-of-group="climate"] .of-dropdown__go')).toBeHidden();
@@ -108,6 +112,7 @@ test.describe('sidebar modes', () => {
 
     await page.locator('[data-of-group="style_general"] a.of-option').first().click();
     await expect(bar).toBeVisible();
+    await expect(bar, 'Review #1: the bar is in the window, not below the sidebar').toBeInViewport({ ratio: 1 });
     await expect(show).toHaveText(/Show \d+ products?/);
     await expect(show).not.toHaveAttribute('aria-busy', 'true');
     const n = Number((await show.textContent())!.replace(/\D/g, ''));
@@ -178,6 +183,20 @@ test.describe('horizontal bar', () => {
     const products = await page.locator('#of-results').boundingBox();
     expect((await bar.boundingBox())!.y).toBeLessThan(products!.y);
     await expect(page.locator('.of-drawer--horizontal details.of-group[open]')).toHaveCount(0);
+
+    // Review #1: one row of filters, the rest behind "More filters (N)".
+    const more = page.locator('[data-of-more-filters]');
+    const shown = page.locator('.of-drawer--horizontal .of-filters__nav > details.of-group:not(.of-group--overflow)');
+    const tops = await shown.evaluateAll((groups) => [...new Set(groups.map((g) => Math.round(g.getBoundingClientRect().top)))]);
+    expect(tops, 'one row').toHaveLength(1);
+    const hidden = await page.locator('.of-drawer--horizontal .of-group--overflow').count();
+    expect(hidden).toBeGreaterThan(0);
+    await expect(more).toHaveText(`More filters (${hidden})`);
+    await more.click();
+    await expect(page.locator('.of-drawer--horizontal .of-group--overflow')).toHaveCount(0);
+    await expect(more).toHaveText('Fewer filters');
+    await more.click();
+    await expect(page.locator('.of-drawer--horizontal .of-group--overflow')).toHaveCount(hidden);
 
     await page.locator('[data-of-group="style_general"] > summary').click();
     await page.locator('[data-of-group="size"] > summary').click();
