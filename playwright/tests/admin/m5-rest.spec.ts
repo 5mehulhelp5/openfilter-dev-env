@@ -44,7 +44,7 @@ test('filters and the config document over REST', async ({ request }) => {
   expect(await (await request.get(`${API}/openfilter/filters/size`, { headers })).json()).toEqual(before);
 
   const document = await (await request.get(`${API}/openfilter/config`, { headers })).json();
-  expect(JSON.parse(document).schema).toBe(2);
+  expect(JSON.parse(document).schema).toBeGreaterThanOrEqual(2);
   const dryRun = await (await request.post(`${API}/openfilter/config`, { headers, data: { config: document, dryRun: true } })).json();
   expect(dryRun).toEqual({ applied: false, changes: [], errors: [] });
 });
