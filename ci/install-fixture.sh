@@ -46,9 +46,18 @@ for m in bundle catalog-rule catalog cms configurable customer downloadable grou
 done
 # OpenFilter is always tested next to OpenLabel; both build on the shared core iranimij/module-base.
 iranimij=('iranimij/module-base:^1.0' 'iranimij/openlabel-hyva-bundle:^1.1')
+# Version of a branch: its dev-main branch alias ("1.2.x-dev" → "1.2.0"), so the inter-package constraints (the Hyvä
+# package of 1.1 requires openfilter ^1.1) resolve against the branches as they will from Packagist.
+branch_version() {
+  curl -fsSL "https://raw.githubusercontent.com/iranimij/$1/$2/composer.json" 2>/dev/null \
+    | php -r '$c = json_decode(stream_get_contents(STDIN), true);
+      echo preg_replace("/\\.x-dev$/", ".0", $c["extra"]["branch-alias"]["dev-main"] ?? "1.0.x-dev");' \
+    || echo 1.0.0
+}
 if [ "$OPENFILTER_INSTALL" = main ]; then
-  # Aliased 1.0.0 so the inter-package constraints (^1.0) resolve against the branches.
-  iranimij+=("iranimij/openfilter:dev-${OPENFILTER_REF} as 1.0.0" "iranimij/openfilter-hyva:dev-${OPENFILTER_HYVA_REF} as 1.0.0")
+  iranimij+=("iranimij/openfilter:dev-${OPENFILTER_REF} as $(branch_version openfilter "$OPENFILTER_REF")"
+             "iranimij/openfilter-hyva:dev-${OPENFILTER_HYVA_REF} as $(branch_version openfilter-hyva "$OPENFILTER_HYVA_REF")")
+  echo "OpenFilter refs: ${iranimij[*]: -2}"
 fi
 # shellcheck disable=SC2086
 composer require --no-update --no-interaction $sample "magento/sample-data-media:100.4.*" \
