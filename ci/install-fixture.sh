@@ -48,11 +48,12 @@ done
 iranimij=('iranimij/module-base:^1.0' 'iranimij/openlabel-hyva-bundle:^1.1')
 # Version of a branch: its dev-main branch alias ("1.2.x-dev" → "1.2.0"), so the inter-package constraints (the Hyvä
 # package of 1.1 requires openfilter ^1.1) resolve against the branches as they will from Packagist.
+# A branch that cannot be read (deleted after its merge) falls back to 1.0.0 once.
 branch_version() {
-  curl -fsSL "https://raw.githubusercontent.com/iranimij/$1/$2/composer.json" 2>/dev/null \
-    | php -r '$c = json_decode(stream_get_contents(STDIN), true);
-      echo preg_replace("/\\.x-dev$/", ".0", $c["extra"]["branch-alias"]["dev-main"] ?? "1.0.x-dev");' \
-    || echo 1.0.0
+  local json
+  json=$(curl -fsSL "https://raw.githubusercontent.com/iranimij/$1/$2/composer.json" 2>/dev/null) || { echo 1.0.0; return; }
+  printf '%s' "$json" | php -r '$c = json_decode(stream_get_contents(STDIN), true);
+      echo preg_replace("/\\.x-dev$/", ".0", $c["extra"]["branch-alias"]["dev-main"] ?? "1.0.x-dev");'
 }
 if [ "$OPENFILTER_INSTALL" = main ]; then
   iranimij+=("iranimij/openfilter:dev-${OPENFILTER_REF} as $(branch_version openfilter "$OPENFILTER_REF")"
