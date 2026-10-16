@@ -9,7 +9,7 @@ test('axe: no violations in OpenFilter regions on load, with groups open, and af
   for (const key of ['color', 'material', 'rating']) {
     await openGroup(page, key);
   }
-  await (await openGroup(page, 'color')).locator('details.of-more > summary').click();
+  await (await openGroup(page, 'material')).locator('details.of-more > summary').click();
   await axeOpenFilter(page, 'groups open');
   const done = page.evaluate(() => new Promise((resolve) => window.addEventListener('openfilter:swapped', resolve, { once: true })));
   await (await openGroup(page, 'material')).locator('a[data-of-link]').first().click();

@@ -50,16 +50,17 @@ test('rating "4 stars & up" filters to its count', async ({ page }) => {
 
 test('"Show more" opens the remaining options from the keyboard and reads "Show less" when open', async ({ page }) => {
   await page.goto(CATEGORY);
-  const more = (await openGroup(page, 'color')).locator('details.of-more');
-  const hidden = await more.locator('a.of-swatch').count();
+  // Material: a long list on the default 6; swatch filters show 12 before "Show more" since Review #1.
+  const more = (await openGroup(page, 'material')).locator('details.of-more');
+  const hidden = await more.locator('a.of-option').count();
   expect(hidden).toBeGreaterThan(0);
   await expect(more.locator('.of-more__show')).toHaveText(`Show more (${hidden})`);
   await expect(more.locator('.of-more__hide')).toBeHidden();
-  await expect(more.locator('a.of-swatch').first()).toBeHidden();
+  await expect(more.locator('a.of-option').first()).toBeHidden();
 
   await more.locator('summary').focus();
   await page.keyboard.press('Enter');
-  await expect(more.locator('a.of-swatch').first()).toBeVisible();
+  await expect(more.locator('a.of-option').first()).toBeVisible();
   await expect(more.locator('.of-more__hide')).toHaveText('Show less');
   await expect(more.locator('.of-more__show')).toBeHidden();
 });

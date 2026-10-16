@@ -42,7 +42,8 @@ test.describe('Filter form', () => {
   test('a German label and a German URL name reach the German storefront', async ({ page }) => {
     expect(await germanPage(page)).toMatch(/[?&]color=schwarz[&"]/);
 
-    await openColour(page);
+    // Since M5 S0 a store view's own label and URL names are edited in that store view's scope.
+    await openAdmin(page, `openfilter/filter/edit/code/color/store/${de}/`);
     await page.locator(`input[name="label_${de}"]`).fill('Farbton');
     await page.locator(`input[name="option_urls[0][url_name_${de}]"]`).fill('dunkel');
     await page.locator('#save').click();
@@ -58,13 +59,15 @@ test.describe('Filter form', () => {
 
   test('a URL name used twice is refused and nothing is saved', async ({ page }) => {
     await openColour(page);
-    await page.locator('input[name="visible_options"]').fill('2');
+    const visible = page.locator('input[name="visible_options"]');
+    const before = await visible.inputValue();
+    await visible.fill('2');
     await page.locator('input[name="option_urls[1][url_name_0]"]').fill('black');
     await page.locator('#save').click();
     await waitForAdmin(page);
 
     await expect(page.locator('.message-error')).toContainText('Another option of this filter already uses the URL name "black".');
-    await expect(page.locator('input[name="visible_options"]')).toHaveValue('6');
+    await expect(page.locator('input[name="visible_options"]')).toHaveValue(before);
     await expect(page.locator('input[name="option_urls[1][url_name_0]"]')).toHaveValue('blue');
   });
 });

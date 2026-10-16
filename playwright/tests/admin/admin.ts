@@ -59,7 +59,7 @@ export async function openAdmin(page: Page, route: string): Promise<void> {
 /** OpenFilter's settings and URL-name tables: admin specs snapshot them and put them back afterwards. */
 export const OPENFILTER_TABLES = [
   'openfilter_attribute', 'openfilter_attribute_store', 'openfilter_builtin', 'openfilter_builtin_store',
-  'openfilter_option_slug', 'openfilter_attribute_slug',
+  'openfilter_option_slug', 'openfilter_attribute_slug', 'openfilter_filter_category',
 ];
 
 function mysqlArgs(): { command: string; args: string[]; dumpCommand: string; dumpArgs: string[] } {
@@ -102,6 +102,8 @@ export async function massAction(page: Page, labels: string[], action: string): 
     const row = page.locator('.data-grid tbody tr.data-row').filter({ has: page.locator('td', { hasText: new RegExp(`^\\s*${label}\\s*$`) }) }).first();
     await row.locator('input.admin__control-checkbox').check();
   }
+  // Checking a row below the fold turns on the grid's sticky header, which hides the toolbar's own Actions button.
+  await page.evaluate(() => window.scrollTo(0, 0));
   await page.locator('.admin__data-grid-header .action-select').filter({ hasText: 'Actions' }).first().click();
   await page.locator('.action-menu-item', { hasText: action }).first().click();
 }

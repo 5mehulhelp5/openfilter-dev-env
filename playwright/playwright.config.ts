@@ -39,6 +39,11 @@ const themeProjects = storefrontThemes().flatMap(({ key, store, hyva }) => [
 
 const rtl = rtlStore();
 
+/** Storefront project names of this run (desktop, perf, mobile, no-JS per Hyvä version, and RTL). */
+function storefrontProjectNames(): string[] {
+  return [...themeProjects.map((project) => project.name as string), ...(rtl ? ['desktop-rtl'] : [])];
+}
+
 export default defineConfig({
   testDir: './tests',
   fullyParallel: true,
@@ -67,7 +72,10 @@ export default defineConfig({
     {
       name: 'admin-chromium',
       testMatch: /admin\/.*\.spec\.ts/,
-      dependencies: ['admin-setup'],
+      // Admin specs change settings the storefront reads (URL names, ranges, the category tree, where filters
+      // show). In CI every project runs in one command, so they wait for the storefront projects instead of
+      // overlapping them; locally `--project=admin-chromium` stays quick.
+      dependencies: ['admin-setup', ...(process.env.CI ? storefrontProjectNames() : [])],
       fullyParallel: false,
       workers: 1,
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 }, storageState: '.auth/admin.json' },

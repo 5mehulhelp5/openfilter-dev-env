@@ -28,7 +28,7 @@ test.describe('OpenFilter settings', () => {
     await expect(page).toHaveURL(/system_config\/edit\/section\/openfilter/);
     await expect(page.locator('#openfilter_general-head')).toContainText('General');
     await expect(page.locator('#openfilter_display-head')).toContainText('Display');
-    await expect(page.locator('#openfilter_seo-head')).toContainText('Search engines');
+    await expect(page.locator('#openfilter_seo-head')).toContainText('SEO');
 
     await openGroup(page, 'seo');
     const max = page.locator('#openfilter_seo_max_active_values');

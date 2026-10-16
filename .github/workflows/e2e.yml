@@ -14,11 +14,11 @@ on:
   workflow_dispatch:
     inputs:
       openfilter_ref:
-        description: openfilter branch to install (stacked PRs)
-        default: main
+        description: openfilter branch to install (stacked PRs); empty = ci/openfilter-refs
+        default: ''
       openfilter_hyva_ref:
-        description: openfilter-hyva branch to install (stacked PRs)
-        default: main
+        description: openfilter-hyva branch to install (stacked PRs); empty = ci/openfilter-refs
+        default: ''
       readme:
         description: also run the README install leg (needs the packages on Packagist)
         type: boolean
@@ -26,6 +26,10 @@ on:
       openfilter_constraint:
         description: version constraint for the README leg's composer require, e.g. "^1.0@RC" for a release candidate
         default: ''
+      bench:
+        description: also run the public benchmark (bench/run.mjs, OpenFilter off vs on) as a gate and attach its results
+        type: boolean
+        default: false
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -105,12 +109,30 @@ jobs:
           sudo apt-get install -yq php8.3-fpm php8.3-cli php8.3-bcmath php8.3-curl php8.3-gd php8.3-intl \
             php8.3-mbstring php8.3-mysql php8.3-soap php8.3-xml php8.3-zip nginx varnish
           sudo update-alternatives --set php /usr/bin/php8.3
+          # The runner image ships Xdebug: it slows every request, skews the benchmark's server times and aborts
+          # Magento's deep layout stacks at 256 frames (HTTP 500 on search pages with Magento's own filters).
+          sudo phpdismod -v 8.3 -s ALL xdebug 2>/dev/null || true
           for ini in /etc/php/8.3/cli/php.ini /etc/php/8.3/fpm/php.ini; do
             sudo sed -i 's/^memory_limit = .*/memory_limit = 4G/; s/^;*realpath_cache_size = .*/realpath_cache_size = 10M/' "$ini"
           done
           sudo sed -i "s/^user = www-data/user = runner/; s/^group = www-data/group = runner/" /etc/php/8.3/fpm/pool.d/www.conf
           sudo mkdir -p "$MAGENTO_ROOT" && sudo chown runner:runner "$MAGENTO_ROOT"
           php -v
+          ! php -m | grep -qi xdebug
+
+      # Branches of OpenFilter this run installs: the dispatch inputs, else ci/openfilter-refs (a branch of this
+      # repository whose specs need unmerged OpenFilter work names it there; main otherwise).
+      - name: OpenFilter refs
+        id: refs
+        run: |
+          core=$(sed -n 's/^openfilter=//p' ci/openfilter-refs 2>/dev/null)
+          hyva=$(sed -n 's/^openfilter-hyva=//p' ci/openfilter-refs 2>/dev/null)
+          echo "core=${INPUT_CORE:-${core:-main}}" >> "$GITHUB_OUTPUT"
+          echo "hyva=${INPUT_HYVA:-${hyva:-main}}" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+        env:
+          INPUT_CORE: ${{ inputs.openfilter_ref }}
+          INPUT_HYVA: ${{ inputs.openfilter_hyva_ref }}
 
       - name: Fixture store
         run: ci/install-fixture.sh
@@ -118,14 +140,14 @@ jobs:
           HYVA_THEME_VERSION: ${{ matrix.hyva.theme }}
           HYVA_MODULE_VERSION: ${{ matrix.hyva.module }}
           OPENFILTER_INSTALL: ${{ matrix.mode == 'readme' && 'none' || 'main' }}
-          OPENFILTER_REF: ${{ inputs.openfilter_ref || 'main' }}
-          OPENFILTER_HYVA_REF: ${{ inputs.openfilter_hyva_ref || 'main' }}
+          OPENFILTER_REF: ${{ steps.refs.outputs.core }}
+          OPENFILTER_HYVA_REF: ${{ steps.refs.outputs.hyva }}
 
       - name: Install OpenFilter with the README's commands only
         if: matrix.mode == 'readme'
         run: ci/readme-install.sh
         env:
-          OPENFILTER_REF: ${{ inputs.openfilter_ref || 'main' }}
+          OPENFILTER_REF: ${{ steps.refs.outputs.core }}
           OPENFILTER_CONSTRAINT: ${{ inputs.openfilter_constraint || '' }}
 
       - name: Serve (nginx :8080, Varnish :80)
@@ -193,6 +215,13 @@ jobs:
         working-directory: playwright
         run: npm run lighthouse
 
+      - name: Benchmark (OpenFilter off vs on)
+        if: matrix.mode == 'full' && inputs.bench
+        env:
+          OPENSEARCH_URL: http://127.0.0.1:9200
+          BENCH_GATE: '1'
+        run: node bench/run.mjs
+
       - name: Reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -201,5 +230,6 @@ jobs:
           path: |
             playwright/playwright-report
             playwright/lighthouse-report
+            bench/results
             ${{ env.MAGENTO_ROOT }}/var/log
           retention-days: 14
