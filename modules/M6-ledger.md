@@ -56,4 +56,37 @@ Commits: core PR #75.
 ## S8 · Migration from other filter modules
 Ruling: redirects of old filter URLs are opt-in per store view (*Moving from another filter module › Redirect old filter URLs*). A router after URL rewrites, landing pages and the All Products page answers them with a 301 to OpenFilter's URL of the same category and filters (query or path format). Formats come only from the vendors' public user guides (Amasty, Mirasvit, Mageplaza; cited in `docs/migration.md`). Nothing is guessed: unknown words, or an option name two filters share without its attribute, stay 404.
 Ruling: `bin/magento openfilter:migrate` lists other filter modules still enabled and the command to switch them off, the filters taken over and the redirect state; `--redirects=on|off`, `--filter-keys`, `--urls=<file>` (dry run). The doctor gains *No other layered navigation module is enabled*.
-Commits: core PR #76 (CI, E2E and merge recorded in the hand-off entry).
+Commits: core PR #76 (CI fixes for PHPUnit 9 data providers and a fixture-independent shared-name test; E2E 40153081312 green; merged 2026-10-25), spec dev-env #11.
+
+## Hand-off (2026-10-25)
+The background session that merged S7 and S8 ran in a git worktree on the laptop (the "remote" isolation fell back to a local worktree); it stopped while building S9 when its worktree was removed. Its uncommitted S9 core work was saved as a WIP commit and finished in the laptop session.
+
+## S9 · Merchant insights
+Ruling: opt-in per store view and anonymous. A beacon (`POST /openfilter/insights/collect`, no form key so full-page-cached pages can send it) carries the store view, category, active filters and a product count bucket; every key and value is checked against the store view's active filters; counts are added per day, store view, category, filter and value (one upsert per beacon), a nightly cron job removes days past the retention, Magento's visitor log skips the route. Nothing about the shopper is read or stored.
+Ruling: the Insights page lists the most used filters and values, unused filters, combinations without products, filters worth indexing and a suggested order that *Sort filters* shows for review (nothing saved before *Save order*).
+Ruling: the Hyvä script (`js/insights.phtml`, 340 B gzipped, budget 768 B) is static and printed only when on; it reads `#of-insights` of the page, or of the fetched page after a swap (`openfilter:swapped` carries the document).
+Finding: a template that throws (here the Hyvä S9 template on a core without S9) makes Magento log the error and send the page uncacheable (`no-store`), silently: the benchmark's Varnish row showed 0 of 6. Keep both module repositories on matching branches locally.
+Tests: unit 612, integration CollectTest/PurgeTest/InsightsPageTest 17/17, hyva StorefrontModesTest 9/9 and the budget test; Playwright admin m6-insights 4/4; E2E 40179208590 green on both legs.
+Commits: core #77, hyva #37, dev-env #12.
+
+## Fixes found in M6 (released as 1.1.1)
+Finding: Magento's Varnish configuration sorts query parameters alphabetically (`std.querysort` in `vcl_recv`). The normaliser 301ed filter URLs to the filters' own parameter order, so behind Magento's VCL any non-alphabetical order looped ("too many redirects"). Hidden until now: the sample data's positions tie and ties fall back to the filter code, which happens to be alphabetical; Warden's own VCL does not sort. S10's install order (price before colour) exposed it in CI. Fix: the parameter order alone never redirects (core #80).
+Finding: the desktop apply bar is appended to `body`, outside the elements that define OpenFilter's colour variables, so it had no background, border or button colour (core #79). Found by S11's visual checks.
+Release: v1.1.1 from `release/1.1.x` (core #81), tagged and released 2026-10-25; on Packagist.
+
+## S10 · Admin polish
+Ruling: *Set up OpenFilter* above the Filters grid: five steps whose state comes from what was saved (first-run flag, a saved order, display and SEO settings, cache state), hidden on request; the install order does not count as the merchant's.
+Ruling: the Why panel opens with one status line (the first problem and its fix; "on search result pages" when only those miss the filter), the checks fold below.
+Ruling: a live preview with a real category, two option labels and the store name under the SEO templates; the count measures the preview.
+Ruling: new installs get category, price, swatch filters, then the others, written as sort positions by the install patch (it runs once, so existing shops keep their order). Uninstall removes OpenFilter's admin flags.
+Finding: the new order changed several specs' assumptions (groups open by default, parameter and segment order); specs now pin or accept the order.
+Commits: core #78, dev-env feat/m6-s10-spec.
+
+## S11 · Visual checks and benchmark scenarios
+Ruling: `toHaveScreenshot` baselines are rendered by the CI runner (Linux), one folder per Hyvä version and device (`visual-h14`, `visual-mobile-h15` …); the E2E input `update_snapshots` writes and uploads them; locally the visual projects only run on Linux or with OF_VISUAL_ANY=1 to try selectors.
+Ruling: the benchmark adds a path URL, the next page as *Load more* fetches it and a landing page, each set up for the OpenFilter run only.
+Tests: local benchmark (3 runs): 1 engine request in every OpenFilter scenario against Magento's 4; Varnish serves 6 of 6 of the second shopper's clicks.
+
+## S12 · Close
+Upgrade gate (2026-10-25, local): a store on core 1.1.1 + Hyvä 1.1.0 captured, upgraded to main (with S10), compared: no differences on 10 pages.
+
