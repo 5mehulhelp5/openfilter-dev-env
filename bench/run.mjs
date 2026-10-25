@@ -60,9 +60,23 @@ function setEnabled(on) {
 const median = (values) => [...values].sort((a, b) => a - b)[Math.floor(values.length / 2)];
 const uncached = (path) => `${path}${path.includes('?') ? '&' : '?'}of_t=${Date.now()}${Math.floor(Math.random() * 1e6)}`;
 
+/**
+ * fetch, again once when the server closed a kept-alive connection under it: the cache clean before a scenario takes
+ * longer than Varnish's idle timeout, so the next request can meet a socket Varnish has just closed.
+ */
+async function request(url, options) {
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(url, options);
+    } catch (error) {
+      if (attempt >= 3 || error?.cause?.code !== 'UND_ERR_SOCKET') throw error;
+    }
+  }
+}
+
 async function load(path) {
   const started = performance.now();
-  const response = await fetch(base + path, { redirect: 'manual' });
+  const response = await request(base + path, { redirect: 'manual' });
   const body = await response.text();
   return { ms: performance.now() - started, status: response.status, cache: response.headers.get('x-cache'), body };
 }
@@ -121,7 +135,7 @@ function session(mode, list) {
 /** The URL a scenario lands on: each mode answers non-canonical spellings with a redirect. */
 async function canonical(path) {
   for (let hops = 0; hops < 3; hops++) {
-    const response = await fetch(base + uncached(path), { redirect: 'manual' });
+    const response = await request(base + uncached(path), { redirect: 'manual' });
     await response.text();
     const location = response.headers.get('location');
     if (response.status < 300 || response.status >= 400 || !location) return path;
@@ -169,7 +183,7 @@ async function openFilterBytes(path) {
   const html = (await load(uncached(path))).body;
   const script = /x-data="openFilter"[\s\S]*?<script>([\s\S]*?)<\/script>/.exec(html)?.[1] ?? '';
   const cssUrl = /href="([^"]*Iranimij_OpenFilter\/css\/openfilter\.css)"/.exec(html)?.[1];
-  const css = cssUrl ? await (await fetch(new URL(cssUrl, base))).text() : '';
+  const css = cssUrl ? await (await request(new URL(cssUrl, base))).text() : '';
   return { jsGzip: gzipSync(script, { level: 9 }).length, cssGzip: gzipSync(css, { level: 9 }).length };
 }
 
