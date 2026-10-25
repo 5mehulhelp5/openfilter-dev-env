@@ -25,7 +25,7 @@ function storefront(name: string, store: string, hyva: string, project: Project)
 const perf = !!process.env.OF_PERF;
 const themeProjects = storefrontThemes().flatMap(({ key, store, hyva }) => [
   storefront(`desktop-${key}`, store, hyva, {
-    testIgnore: /admin\/|nojs\/|screenshots\/|rtl\/|readme\/|\.mobile\.spec\.ts|\.setup\.ts/,
+    testIgnore: /admin\/|nojs\/|screenshots\/|visual\/|rtl\/|readme\/|\.mobile\.spec\.ts|\.setup\.ts/,
     grepInvert: /@perf/,
     use: { ...devices['Desktop Chrome'] },
   }),
@@ -38,6 +38,22 @@ const themeProjects = storefrontThemes().flatMap(({ key, store, hyva }) => [
 ]);
 
 const rtl = rtlStore();
+
+// Visual checks (OF_VISUAL=1, CI): after the admin specs (they change settings too), one worker, baselines per Hyvä
+// version and device in tests/visual/__screenshots__/<project>/.
+const visualKey = storefrontThemes()[0]?.key ?? 'h14';
+const visual = !!process.env.OF_VISUAL;
+// The projects change shared settings, so they run one after the other (phone after desktop).
+const visualProject = (name: string, device: Project['use'], after: string[] = []): Project => ({
+  name,
+  dependencies: after,
+  testMatch: /visual\/.*\.spec\.ts/,
+  fullyParallel: false,
+  workers: 1,
+  snapshotPathTemplate: '{testDir}/visual/__screenshots__/{projectName}/{arg}{ext}',
+  expect: { toHaveScreenshot: { animations: 'disabled', caret: 'hide', maxDiffPixelRatio: 0.01 } },
+  use: device,
+});
 
 /** Storefront project names of this run (desktop, perf, mobile, no-JS per Hyvä version, and RTL). */
 function storefrontProjectNames(): string[] {
@@ -69,6 +85,10 @@ export default defineConfig({
     // Screenshots for milestone reports (OF_SCREENSHOTS=1, local only).
     ...(process.env.OF_SCREENSHOTS ? [{ name: 'screenshots-chromium', testMatch: /screenshots\/.*\.spec\.ts/, dependencies: ['admin-setup', storeSetup.name], use: { ...devices['Desktop Chrome'], storageState: '.auth/admin.json' } }] : []),
     { name: 'admin-setup', testMatch: /admin\/auth\.setup\.ts/ },
+    ...(visual ? [
+      visualProject(`visual-${visualKey}`, { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }),
+      visualProject(`visual-mobile-${visualKey}`, { ...devices['Pixel 7'] }, [`visual-${visualKey}`]),
+    ] : []),
     {
       name: 'admin-chromium',
       testMatch: /admin\/.*\.spec\.ts/,

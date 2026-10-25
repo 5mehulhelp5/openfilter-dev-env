@@ -63,7 +63,10 @@ test('filters, counts and URLs from openfilter_aggregations', async ({ page, req
 
   await page.locator('details[data-code="color"] label', { hasText: /^Blue/ }).click();
   await expect(page).toHaveURL(/[?&]color=black,blue(&|$)/);
-  await page.locator('details[data-code="price"] > summary').click();
+  // Open the price group unless it starts open (new installs since 1.2 put price second).
+  if (await page.locator('details[data-code="price"]').getAttribute('open') === null) {
+    await page.locator('details[data-code="price"] > summary').click();
+  }
   await page.locator('details[data-code="price"] input[name="from"]').fill('30');
   await page.locator('details[data-code="price"] input[name="to"]').fill('50');
   await page.locator('details[data-code="price"] button', { hasText: 'Apply' }).click();

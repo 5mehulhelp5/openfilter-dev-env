@@ -60,7 +60,9 @@ async function noJs(browser: Browser, url: string): Promise<Page> {
 
 test.beforeAll(() => {
   restore = snapshotOpenFilter();
-  attribute('style_general', "logic = 'and'", 'A product has each style you pick.');
+  // Style and size first (after the category), whatever order the install gave the filters (1.2 sorts new installs).
+  attribute('style_general', "logic = 'and', position_override = -50", 'A product has each style you pick.');
+  attribute('size', 'position_override = -40');
   attribute('climate', "display_mode = 'dropdown'");
   sql(`UPDATE openfilter_builtin SET display_mode = 'tree', multiselect = 1 WHERE code = 'category'`);
   clean();

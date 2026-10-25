@@ -80,7 +80,34 @@ function scenarios() {
     'two values of one filter': { off: null, on: `${tops}?color=black,blue`, note: `Magento: one value per filter (color=${blue} replaces black)` },
     'search page': { off: '/catalogsearch/result/?q=jacket', on: '/catalogsearch/result/?q=jacket' },
     'search with a filter': { off: `/catalogsearch/result/?q=jacket&color=${black}`, on: '/catalogsearch/result/?q=jacket&color=black' },
+    // 1.2: path filter URLs, the next page as "Load more" fetches it, a landing page; Magento's equivalent page.
+    'path URL, one filter': { off: `${tops}?color=${black}`, on: '/women/tops-women/color-black.html', settings: { 'openfilter/seo/url_format': 'path' } },
+    'next page (load more)': { off: `${tops}?p=2`, on: `${tops}?p=2`, settings: { 'openfilter/display/pagination': 'load_more' } },
+    'landing page': { off: `${tops}?color=${black}`, on: '/bench-black-tops', landing: { urlKey: 'bench-black-tops', category: tops, filters: { color: [black] } } },
   };
+}
+
+/** Settings and landing pages a scenario needs (OpenFilter only), then put back. */
+function prepare(urls) {
+  for (const [path, value] of Object.entries(urls.settings ?? {})) {
+    sql(`INSERT INTO core_config_data (scope, scope_id, path, value) VALUES ('default', 0, '${path}', '${value}')
+         ON DUPLICATE KEY UPDATE value = '${value}'`);
+  }
+  if (urls.landing) {
+    const { urlKey, category, filters } = urls.landing;
+    const categoryId = sql(`SELECT entity_id FROM url_rewrite WHERE request_path = '${category.slice(1)}' AND entity_type = 'category' LIMIT 1`);
+    sql(`INSERT INTO openfilter_landing_page (is_active, category_id, filters, url_key, title, robots)
+         VALUES (1, ${categoryId}, '${JSON.stringify(filters)}', '${urlKey}', 'Benchmark', 'NOINDEX,FOLLOW')`);
+    sql(`INSERT INTO openfilter_landing_page_store (page_id, store_id) SELECT page_id, 0 FROM openfilter_landing_page WHERE url_key = '${urlKey}'`);
+  }
+  if (urls.settings || urls.landing) magento('cache:clean', 'config', 'openfilter', 'full_page');
+}
+function restore(urls) {
+  for (const path of Object.keys(urls.settings ?? {})) {
+    sql(`DELETE FROM core_config_data WHERE scope = 'default' AND path = '${path}'`);
+  }
+  if (urls.landing) sql(`DELETE FROM openfilter_landing_page WHERE url_key = '${urls.landing.urlKey}'`);
+  if (urls.settings || urls.landing) magento('cache:clean', 'config', 'openfilter', 'full_page');
 }
 
 /** A shopper's clicks: the second shopper's pages that Varnish answers (HIT) out of all pages. */
@@ -106,26 +133,29 @@ async function canonical(path) {
 }
 
 async function measureMode(mode, list) {
-  for (const urls of Object.values(list)) {
-    if (urls[mode] !== null) urls[mode] = await canonical(urls[mode]);
-  }
   const out = {};
   for (const [name, urls] of Object.entries(list)) {
-    const path = urls[mode];
-    if (path === null) {
+    if (urls[mode] === null) {
       out[name] = { supported: false, note: urls.note };
       continue;
     }
-    await load(uncached(path)); // warm caches of the code path (not of the page)
-    const before = engineQueries();
-    const first = await load(uncached(path));
-    const requests = engineQueries() - before;
-    const times = [];
-    for (let i = 0; i < runs; i++) {
-      times.push((await load(uncached(path))).ms);
+    const own = mode === 'on' && (urls.settings || urls.landing);
+    if (own) prepare(urls);
+    try {
+      const path = urls[mode] = await canonical(urls[mode]);
+      await load(uncached(path)); // warm caches of the code path (not of the page)
+      const before = engineQueries();
+      const first = await load(uncached(path));
+      const requests = engineQueries() - before;
+      const times = [];
+      for (let i = 0; i < runs; i++) {
+        times.push((await load(uncached(path))).ms);
+      }
+      if (first.status !== 200) throw new Error(`${mode} ${path}: HTTP ${first.status}`);
+      out[name] = { supported: true, url: path, engineRequests: requests, serverMs: Math.round(median(times) * 10) / 10 };
+    } finally {
+      if (own) restore(urls);
     }
-    if (first.status !== 200) throw new Error(`${mode} ${path}: HTTP ${first.status}`);
-    out[name] = { supported: true, url: path, engineRequests: requests, serverMs: Math.round(median(times) * 10) / 10 };
   }
   const clicks = session(mode, list);
   for (const path of clicks) await load(path); // first shopper
