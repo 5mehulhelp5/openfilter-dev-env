@@ -60,6 +60,7 @@ export async function openAdmin(page: Page, route: string): Promise<void> {
 export const OPENFILTER_TABLES = [
   'openfilter_attribute', 'openfilter_attribute_store', 'openfilter_builtin', 'openfilter_builtin_store',
   'openfilter_option_slug', 'openfilter_attribute_slug', 'openfilter_filter_category', 'openfilter_option_image',
+  'openfilter_landing_page_store', 'openfilter_landing_page',
 ];
 
 function mysqlArgs(): { command: string; args: string[]; dumpCommand: string; dumpArgs: string[] } {

@@ -39,3 +39,21 @@ Ruling: a small frontend router (after Magento's URL rewrite router, before the 
 Ruling: the page is the store's root category on Magento's layered category page (its handles added by the controller), so theme templates, OpenFilter's Hyvä templates, AJAX and SEO rules apply unchanged; title, H1 and canonical are set once the blocks exist (Magento's category view block names the page after the category while the layout is built).
 Finding: integration tests must dispatch storefront paths with a leading slash for routers that read the path info.
 Tests: unit AllProductsTest, RouterTest; integration AllProductsPageTest (404 when off, title, one canonical, links keep the URL key, 301 to the URL key); Playwright admin m6-all-products 3/3.
+
+## S6 · Path filter URLs
+Ruling: *SEO › Filter URLs on category pages* = *Paths* (`/women/tops-women/color-black,blue/size-m.html`) is opt-in; query parameters stay the default, and search pages and the All Products page keep them. Segments follow the canonical filter order; a filter whose segment could read as another stays in the query.
+Ruling: `Controller\PathRouter` runs before Magento's URL rewrite router, moves the filter segments into query values and lets the URL rewrite router find the category: the same one rewrite lookup, no extra SQL, one search request. The normaliser 301s query links (including the no-JavaScript slider and dropdown forms) and other segment orders to the canonical path; canonical tags and the XML sitemap follow.
+Tests: unit 536 (PathUrlTest), integration 234 (PathUrlsTest: same products as the query twin, 301s, 404, one search request, SQL no more than the query twin) + hyva 40, performance 17/17; Playwright storefront 141, admin 63 (m6-path-urls 3/3).
+Commits: core PR #69.
+
+## S7 · Landing pages
+Ruling: a landing page is a category with fixed filters at its own URL key, with its own title, H1, meta tags, robots value and text. The merchant pastes the address of a filtered category page (query or path URLs) instead of picking filters one by one; URL keys taken by a category, product, CMS page or another landing page of the same store views are refused.
+Ruling: a router after Magento's URL rewrites serves the URL key as the category page with the filters applied (same templates, counts, chips, AJAX). Filter links that reach exactly a landing page's state point to it, and the filtered category page names it canonical. Pages come from the OpenFilter cache: no SQL on the storefront. Indexable pages are in the XML sitemap; GraphQL `openfilter_landing_page(url_key)`.
+Finding: admin specs snapshot OpenFilter's tables; the landing tables (`openfilter_landing_page_store` before its parent) are now part of that list.
+Tests: unit 555, integration 243 + hyva 40, performance 17/17 (+3.5 ms); CI green; E2E run 40142672766 green on Hyvä 1.4.2, 1.5.2 and the README leg (Playwright admin m6-landing 2/2).
+Commits: core PR #75.
+
+## S8 · Migration from other filter modules
+Ruling: redirects of old filter URLs are opt-in per store view (*Moving from another filter module › Redirect old filter URLs*). A router after URL rewrites, landing pages and the All Products page answers them with a 301 to OpenFilter's URL of the same category and filters (query or path format). Formats come only from the vendors' public user guides (Amasty, Mirasvit, Mageplaza; cited in `docs/migration.md`). Nothing is guessed: unknown words, or an option name two filters share without its attribute, stay 404.
+Ruling: `bin/magento openfilter:migrate` lists other filter modules still enabled and the command to switch them off, the filters taken over and the redirect state; `--redirects=on|off`, `--filter-keys`, `--urls=<file>` (dry run). The doctor gains *No other layered navigation module is enabled*.
+Commits: core PR #76 (CI, E2E and merge recorded in the hand-off entry).
