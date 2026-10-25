@@ -26,9 +26,17 @@ OpenFilter 1.2 brings the professional features of paid layered navigation modul
 
 **Still one search request per page**
 
-BENCHMARK_TABLE
+| Page | Magento | OpenFilter |
+|---|---|---|
+| Category page | 4 requests · 245 ms | 1 request · 233 ms |
+| Three filters | 4 requests · 225 ms | 1 request · 222 ms |
+| Two values of one filter | not possible | 1 request · 237 ms |
+| Path URL, one filter | 4 requests · 240 ms | 1 request · 233 ms |
+| Next page ("Load more") | 4 requests · 242 ms | 1 request · 233 ms |
+| Landing page | 4 requests · 239 ms | 1 request · 230 ms |
+| Search page | 4 requests · 229 ms | 1 request · 226 ms |
 
-Same store, Varnish and the page cache skipped, median of 11 loads ([benchmark](https://github.com/iranimij/openfilter/blob/main/docs/benchmark.md)). Every filter click stays cacheable by Varnish.
+Same store (Magento 2.4.9, Hyvä 1.5.2, CI runner, 1.2.0-rc1), Varnish and the page cache skipped, median of 11 loads ([benchmark](https://github.com/iranimij/openfilter/blob/main/docs/benchmark.md)). Every filter click stays cacheable by Varnish.
 
 **Update**
 
