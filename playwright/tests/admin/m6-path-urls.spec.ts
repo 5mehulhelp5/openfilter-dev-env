@@ -58,6 +58,7 @@ test('an old query link and the no-JavaScript price form land on paths', async (
   const from = Math.ceil(Number(await price.locator('[data-of-number="from"]').getAttribute('min'))) + 1;
   await price.locator('[data-of-number="from"]').fill(String(from));
   await price.locator('.of-slider__apply').click();
-  await expect(page).toHaveURL(new RegExp(`/women/tops-women/color-black/price-${from}-${max}\\.html`));
+  // Segments follow the filters' order (price first on new installs since 1.2).
+  await expect(page).toHaveURL(new RegExp(`/women/tops-women/(color-black/price-${from}-${max}|price-${from}-${max}/color-black)\\.html`));
   await context.close();
 });
