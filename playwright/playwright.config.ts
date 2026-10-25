@@ -43,8 +43,10 @@ const rtl = rtlStore();
 // version and device in tests/visual/__screenshots__/<project>/.
 const visualKey = storefrontThemes()[0]?.key ?? 'h14';
 const visual = !!process.env.OF_VISUAL;
-const visualProject = (name: string, device: Project['use']): Project => ({
+// The projects change shared settings, so they run one after the other (phone after desktop).
+const visualProject = (name: string, device: Project['use'], after: string[] = []): Project => ({
   name,
+  dependencies: after,
   testMatch: /visual\/.*\.spec\.ts/,
   fullyParallel: false,
   workers: 1,
@@ -85,7 +87,7 @@ export default defineConfig({
     { name: 'admin-setup', testMatch: /admin\/auth\.setup\.ts/ },
     ...(visual ? [
       visualProject(`visual-${visualKey}`, { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } }),
-      visualProject(`visual-mobile-${visualKey}`, { ...devices['Pixel 7'] }),
+      visualProject(`visual-mobile-${visualKey}`, { ...devices['Pixel 7'] }, [`visual-${visualKey}`]),
     ] : []),
     {
       name: 'admin-chromium',

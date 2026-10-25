@@ -213,7 +213,7 @@ jobs:
         env:
           OF_THEMES: ${{ startsWith(matrix.hyva.theme, '1.5') && 'h15:default' || 'h14:default' }}
           OF_VISUAL: '1'
-        run: npx playwright test --project='visual-*' ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+        run: npx playwright test --project='visual-*' --workers=1 ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
 
       - name: Visual baselines
         if: always() && matrix.mode == 'full' && inputs.update_snapshots
