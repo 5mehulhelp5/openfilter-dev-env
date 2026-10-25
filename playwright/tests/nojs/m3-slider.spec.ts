@@ -11,6 +11,7 @@ test('without JavaScript: the price form applies through a 301 to price=from-to 
   await price.locator('[data-of-number="from"]').fill('30');
   await price.locator('.of-slider__apply').click();
 
-  await expect(page).toHaveURL(new RegExp(`\\?color=blue&price=30-${max}$`));
+  // The filters' order decides the parameter order (price first on new installs since 1.2).
+  await expect(page).toHaveURL(new RegExp(`\\?(color=blue&price=30-${max}|price=30-${max}&color=blue)$`));
   await expect(page.locator('#of-state a.of-chip', { hasText: 'Price' })).toBeVisible();
 });

@@ -21,7 +21,8 @@ test('settings: sticky sidebar visible with the layout inherited, section names,
   const count = page.locator('#openfilter_seo_meta_title + .of-template-length');
   await expect(count).toHaveText('0 of about 60 characters shown in search results');
   await page.locator('#openfilter_seo_meta_title').fill('{filters} {category} | {store}');
-  await expect(count).toHaveText('30 of about 60 characters shown in search results');
+  // 1.2: a preview with a real category, two option labels and the store name, and its length.
+  await expect(count).toHaveText(/^Preview: .+, .+ .+ \| .+ · \d+ of about 60 characters shown in search results$/);
 });
 
 test('grid: same-name warning, storefront order, Show on search pages', async ({ page }) => {
