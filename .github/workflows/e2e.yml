@@ -30,6 +30,10 @@ on:
         description: also run the public benchmark (bench/run.mjs, OpenFilter off vs on) as a gate and attach its results
         type: boolean
         default: false
+      update_snapshots:
+        description: write new visual baselines (tests/visual) instead of comparing; download them from the artifact and commit them
+        type: boolean
+        default: false
 
 concurrency:
   group: e2e-${{ github.ref }}
@@ -202,6 +206,22 @@ jobs:
             npx playwright test
           fi
 
+
+      - name: Visual (toHaveScreenshot)
+        if: matrix.mode == 'full'
+        working-directory: playwright
+        env:
+          OF_THEMES: ${{ startsWith(matrix.hyva.theme, '1.5') && 'h15:default' || 'h14:default' }}
+          OF_VISUAL: '1'
+        run: npx playwright test --project='visual-*' ${{ inputs.update_snapshots && '--update-snapshots' || '' }}
+
+      - name: Visual baselines
+        if: always() && matrix.mode == 'full' && inputs.update_snapshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: visual-baselines-hyva-${{ matrix.hyva.theme }}
+          path: playwright/tests/visual/__screenshots__
+          retention-days: 14
 
       - name: Timing budgets (one worker)
         if: matrix.mode == 'full'
